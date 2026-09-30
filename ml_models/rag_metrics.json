@@ -1,0 +1,232 @@
+{
+  "generated_at": "2026-09-30T15:02:30.891519+00:00",
+  "embedder": "hashing-v1",
+  "answer_engine": "offline extractive (LLM answers are not scored here)",
+  "n_questions": 24,
+  "n_answerable": 19,
+  "n_unanswerable": 5,
+  "recall_at_1": 0.8947,
+  "recall_at_5": 1.0,
+  "mrr": 0.9474,
+  "answer_contains_evidence": 0.7368,
+  "refusal_accuracy_unanswerable": 1.0,
+  "false_refusals_answerable": 0,
+  "rows": [
+    {
+      "doc": "ml_chapter",
+      "question": "What is a training set?",
+      "answerable": true,
+      "rank": 2,
+      "answer": "Step 3: Fit the model on the training set. Definition: A training set is the collection of labelled examples that a learning algorithm uses to fit the parameters of a model.",
+      "answer_has_evidence": true,
+      "refused": false
+    },
+    {
+      "doc": "ml_chapter",
+      "question": "What does unsupervised learning do?",
+      "answerable": true,
+      "rank": 1,
+      "answer": "2.2 Unsupervised Learning: Unsupervised learning finds structure in unlabelled data.",
+      "answer_has_evidence": true,
+      "refused": false
+    },
+    {
+      "doc": "ml_chapter",
+      "question": "How does an agent learn in reinforcement learning?",
+      "answerable": true,
+      "rank": 1,
+      "answer": "2.3 Reinforcement Learning: In reinforcement learning an agent interacts with an environment and learns a policy that maximises cumulative reward through trial and error.",
+      "answer_has_evidence": true,
+      "refused": false
+    },
+    {
+      "doc": "ml_chapter",
+      "question": "What is the difference between classification and regression?",
+      "answerable": true,
+      "rank": 1,
+      "answer": "4. Review Questions: Q1. What is the difference between classification and regression? Answer:",
+      "answer_has_evidence": false,
+      "refused": false
+    },
+    {
+      "doc": "ml_chapter",
+      "question": "Why should a model not be evaluated on its training data?",
+      "answerable": true,
+      "rank": 1,
+      "answer": "MSE = (1/n) * \u03a3 (y_i \u2212 \u0177_i)\u00b2 Important: Never evaluate a model on the same data that was used to train it.",
+      "answer_has_evidence": true,
+      "refused": false
+    },
+    {
+      "doc": "ml_chapter",
+      "question": "What is regression?",
+      "answerable": true,
+      "rank": 2,
+      "answer": "4. Review Questions: Q1. What is the difference between classification and regression? Answer: Classification predicts a discrete category, while regression predicts a continuous numerical value. Q2.",
+      "answer_has_evidence": false,
+      "refused": false
+    },
+    {
+      "doc": "ml_chapter",
+      "question": "What reduces the accuracy of a model?",
+      "answerable": true,
+      "rank": 1,
+      "answer": "Noisy labels, missing values and biased samples all reduce accuracy.",
+      "answer_has_evidence": true,
+      "refused": false
+    },
+    {
+      "doc": "ml_chapter",
+      "question": "Who wrote Pattern Recognition and Machine Learning?",
+      "answerable": true,
+      "rank": 1,
+      "answer": "Pattern Recognition and Machine Learning. Springer.",
+      "answer_has_evidence": false,
+      "refused": false
+    },
+    {
+      "doc": "ml_chapter",
+      "question": "What is the capital city of Australia?",
+      "answerable": false,
+      "rank": null,
+      "answer": null,
+      "answer_has_evidence": false,
+      "refused": true
+    },
+    {
+      "doc": "ml_chapter",
+      "question": "How do you bake sourdough bread?",
+      "answerable": false,
+      "rank": null,
+      "answer": null,
+      "answer_has_evidence": false,
+      "refused": true
+    },
+    {
+      "doc": "biology_notes",
+      "question": "What is chlorophyll?",
+      "answerable": true,
+      "rank": 1,
+      "answer": "Chlorophyll: the green pigment inside chloroplasts that absorbs mostly red and blue light.",
+      "answer_has_evidence": true,
+      "refused": false
+    },
+    {
+      "doc": "biology_notes",
+      "question": "Where does the Calvin cycle happen?",
+      "answerable": true,
+      "rank": 1,
+      "answer": "Exam Practice: 1. Where in the chloroplast does the Calvin cycle happen? Answer:",
+      "answer_has_evidence": false,
+      "refused": false
+    },
+    {
+      "doc": "biology_notes",
+      "question": "Where does the oxygen released in photosynthesis come from?",
+      "answerable": true,
+      "rank": 1,
+      "answer": "6CO2 + 6H2O + light \u2192 C6H12O6 + 6O2 Remember: the oxygen released comes from water, not from carbon dioxide.",
+      "answer_has_evidence": true,
+      "refused": false
+    },
+    {
+      "doc": "biology_notes",
+      "question": "What controls the rate of photosynthesis?",
+      "answerable": true,
+      "rank": 1,
+      "answer": "Limiting Factors: The rate of photosynthesis is controlled by whichever factor is in shortest supply: light intensity, carbon dioxide concentration or temperature. Summary: To sum up, photosynthesis converts light into chemical energy in two linked stages, and its rate is set by the most limiting factor.",
+      "answer_has_evidence": true,
+      "refused": false
+    },
+    {
+      "doc": "biology_notes",
+      "question": "Which enzyme fixes carbon dioxide?",
+      "answerable": true,
+      "rank": 1,
+      "answer": "The Calvin cycle: In the stroma, carbon dioxide is fixed by the enzyme RuBisCO and, using ATP and NADPH, is turned into glucose over several turns of the cycle.",
+      "answer_has_evidence": true,
+      "refused": false
+    },
+    {
+      "doc": "biology_notes",
+      "question": "Why do greenhouse farmers burn paraffin?",
+      "answerable": true,
+      "rank": 1,
+      "answer": "For instance, a greenhouse farmer can burn paraffin to raise both the temperature and the CO2 level, which speeds up growth in winter.",
+      "answer_has_evidence": true,
+      "refused": false
+    },
+    {
+      "doc": "biology_notes",
+      "question": "What is the boiling point of mercury?",
+      "answerable": false,
+      "rank": null,
+      "answer": null,
+      "answer_has_evidence": false,
+      "refused": true
+    },
+    {
+      "doc": "history_notes",
+      "question": "When was the Bastille stormed?",
+      "answerable": true,
+      "rank": 1,
+      "answer": "2.1 The storming of the Bastille:",
+      "answer_has_evidence": false,
+      "refused": false
+    },
+    {
+      "doc": "history_notes",
+      "question": "Who led the Committee of Public Safety?",
+      "answerable": true,
+      "rank": 1,
+      "answer": "2.2 The Reign of Terror: Between 1793 and 1794 the Committee of Public Safety, led by Robespierre, executed thousands of people accused of opposing the revolution. Example:",
+      "answer_has_evidence": true,
+      "refused": false
+    },
+    {
+      "doc": "history_notes",
+      "question": "What was the Estates-General?",
+      "answerable": true,
+      "rank": 1,
+      "answer": "1. Causes: The Estates-General was an assembly representing the clergy, the nobility and the common people, which had not met since 1614.",
+      "answer_has_evidence": true,
+      "refused": false
+    },
+    {
+      "doc": "history_notes",
+      "question": "Why was France nearly bankrupt?",
+      "answerable": true,
+      "rank": 1,
+      "answer": "1. Causes: By the late 1780s France was nearly bankrupt after expensive wars, and a series of poor harvests pushed the price of bread beyond the reach of ordinary families.",
+      "answer_has_evidence": true,
+      "refused": false
+    },
+    {
+      "doc": "history_notes",
+      "question": "What happened to Marie Antoinette?",
+      "answerable": true,
+      "rank": 1,
+      "answer": "Queen Marie Antoinette was tried and guillotined in October 1793.",
+      "answer_has_evidence": true,
+      "refused": false
+    },
+    {
+      "doc": "history_notes",
+      "question": "Who invented the telephone?",
+      "answerable": false,
+      "rank": null,
+      "answer": null,
+      "answer_has_evidence": false,
+      "refused": true
+    },
+    {
+      "doc": "history_notes",
+      "question": "What is photosynthesis?",
+      "answerable": false,
+      "rank": null,
+      "answer": null,
+      "answer_has_evidence": false,
+      "refused": true
+    }
+  ]
+}

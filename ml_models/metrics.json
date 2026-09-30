@@ -1,0 +1,1615 @@
+{
+  "generated_at": "2026-09-30T14:56:29.437421+00:00",
+  "selected_model": "tfidf_logreg",
+  "model_version": "tfidf_logreg-202609301456",
+  "dataset": {
+    "docs_per_subject": 40,
+    "seed": 13,
+    "splits": {
+      "train": {
+        "segments": 13631,
+        "documents": 320,
+        "subjects": [
+          "biology",
+          "physics",
+          "history",
+          "economics",
+          "computer_science",
+          "psychology",
+          "business",
+          "environmental_science"
+        ]
+      },
+      "val": {
+        "segments": 3474,
+        "documents": 80,
+        "subjects": [
+          "chemistry",
+          "geography"
+        ]
+      },
+      "test": {
+        "segments": 3326,
+        "documents": 80,
+        "subjects": [
+          "mathematics",
+          "literature"
+        ]
+      }
+    },
+    "gold_segments": 134,
+    "label_counts_train": {
+      "TITLE": 320,
+      "HEADING": 1878,
+      "SUBHEADING": 1674,
+      "PARAGRAPH": 3666,
+      "DEFINITION": 803,
+      "EXAMPLE": 844,
+      "PROCEDURE": 838,
+      "IMPORTANT_POINT": 862,
+      "FORMULA": 703,
+      "QUESTION": 778,
+      "ANSWER": 513,
+      "CONCLUSION": 259,
+      "REFERENCE": 493
+    }
+  },
+  "comparison": {
+    "tfidf_logreg": {
+      "val": {
+        "n": 3474,
+        "accuracy": 0.9908,
+        "macro": {
+          "precision": 0.9931,
+          "recall": 0.9935,
+          "f1": 0.9933
+        },
+        "weighted": {
+          "precision": 0.9908,
+          "recall": 0.9908,
+          "f1": 0.9908
+        },
+        "per_class": {
+          "TITLE": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 80.0
+          },
+          "HEADING": {
+            "precision": 0.9665,
+            "recall": 0.983,
+            "f1-score": 0.9747,
+            "support": 470.0
+          },
+          "SUBHEADING": {
+            "precision": 0.9811,
+            "recall": 0.963,
+            "f1-score": 0.972,
+            "support": 432.0
+          },
+          "PARAGRAPH": {
+            "precision": 1.0,
+            "recall": 0.9978,
+            "f1-score": 0.9989,
+            "support": 930.0
+          },
+          "DEFINITION": {
+            "precision": 0.9867,
+            "recall": 0.9867,
+            "f1-score": 0.9867,
+            "support": 225.0
+          },
+          "EXAMPLE": {
+            "precision": 0.9951,
+            "recall": 1.0,
+            "f1-score": 0.9976,
+            "support": 204.0
+          },
+          "PROCEDURE": {
+            "precision": 0.9912,
+            "recall": 1.0,
+            "f1-score": 0.9956,
+            "support": 224.0
+          },
+          "IMPORTANT_POINT": {
+            "precision": 1.0,
+            "recall": 0.9856,
+            "f1-score": 0.9927,
+            "support": 208.0
+          },
+          "FORMULA": {
+            "precision": 0.9902,
+            "recall": 1.0,
+            "f1-score": 0.9951,
+            "support": 203.0
+          },
+          "QUESTION": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 197.0
+          },
+          "ANSWER": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 120.0
+          },
+          "CONCLUSION": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 64.0
+          },
+          "REFERENCE": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 117.0
+          }
+        },
+        "confusion_matrix": {
+          "labels": [
+            "TITLE",
+            "HEADING",
+            "SUBHEADING",
+            "PARAGRAPH",
+            "DEFINITION",
+            "EXAMPLE",
+            "PROCEDURE",
+            "IMPORTANT_POINT",
+            "FORMULA",
+            "QUESTION",
+            "ANSWER",
+            "CONCLUSION",
+            "REFERENCE"
+          ],
+          "matrix": [
+            [
+              80,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              462,
+              8,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              16,
+              416,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              928,
+              1,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              222,
+              1,
+              1,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              204,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              224,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              2,
+              0,
+              1,
+              205,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              203,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              197,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              120,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              64,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              117
+            ]
+          ]
+        }
+      },
+      "train_seconds": 14.8,
+      "test_macro_f1": 0.9955,
+      "gold_macro_f1": 0.9284
+    },
+    "tfidf_svm": {
+      "val": {
+        "n": 3474,
+        "accuracy": 0.9873,
+        "macro": {
+          "precision": 0.9912,
+          "recall": 0.9885,
+          "f1": 0.9898
+        },
+        "weighted": {
+          "precision": 0.9875,
+          "recall": 0.9873,
+          "f1": 0.9873
+        },
+        "per_class": {
+          "TITLE": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 80.0
+          },
+          "HEADING": {
+            "precision": 0.9666,
+            "recall": 0.9851,
+            "f1-score": 0.9758,
+            "support": 470.0
+          },
+          "SUBHEADING": {
+            "precision": 0.9519,
+            "recall": 0.963,
+            "f1-score": 0.9574,
+            "support": 432.0
+          },
+          "PARAGRAPH": {
+            "precision": 1.0,
+            "recall": 0.9989,
+            "f1-score": 0.9995,
+            "support": 930.0
+          },
+          "DEFINITION": {
+            "precision": 0.9867,
+            "recall": 0.9867,
+            "f1-score": 0.9867,
+            "support": 225.0
+          },
+          "EXAMPLE": {
+            "precision": 0.9951,
+            "recall": 1.0,
+            "f1-score": 0.9976,
+            "support": 204.0
+          },
+          "PROCEDURE": {
+            "precision": 0.9912,
+            "recall": 1.0,
+            "f1-score": 0.9956,
+            "support": 224.0
+          },
+          "IMPORTANT_POINT": {
+            "precision": 1.0,
+            "recall": 0.9856,
+            "f1-score": 0.9927,
+            "support": 208.0
+          },
+          "FORMULA": {
+            "precision": 0.9947,
+            "recall": 0.931,
+            "f1-score": 0.9618,
+            "support": 203.0
+          },
+          "QUESTION": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 197.0
+          },
+          "ANSWER": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 120.0
+          },
+          "CONCLUSION": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 64.0
+          },
+          "REFERENCE": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 117.0
+          }
+        },
+        "confusion_matrix": {
+          "labels": [
+            "TITLE",
+            "HEADING",
+            "SUBHEADING",
+            "PARAGRAPH",
+            "DEFINITION",
+            "EXAMPLE",
+            "PROCEDURE",
+            "IMPORTANT_POINT",
+            "FORMULA",
+            "QUESTION",
+            "ANSWER",
+            "CONCLUSION",
+            "REFERENCE"
+          ],
+          "matrix": [
+            [
+              80,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              463,
+              7,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              16,
+              416,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              929,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              222,
+              1,
+              1,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              204,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              224,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              2,
+              0,
+              1,
+              205,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              14,
+              0,
+              0,
+              0,
+              0,
+              0,
+              189,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              197,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              120,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              64,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              117
+            ]
+          ]
+        }
+      },
+      "train_seconds": 19.3,
+      "test_macro_f1": 0.995,
+      "gold_macro_f1": 0.8872
+    },
+    "dense_logreg": {
+      "val": {
+        "n": 3474,
+        "accuracy": 0.9891,
+        "macro": {
+          "precision": 0.9888,
+          "recall": 0.99,
+          "f1": 0.9893
+        },
+        "weighted": {
+          "precision": 0.9892,
+          "recall": 0.9891,
+          "f1": 0.9891
+        },
+        "per_class": {
+          "TITLE": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 80.0
+          },
+          "HEADING": {
+            "precision": 0.9706,
+            "recall": 0.983,
+            "f1-score": 0.9767,
+            "support": 470.0
+          },
+          "SUBHEADING": {
+            "precision": 0.9812,
+            "recall": 0.9676,
+            "f1-score": 0.9744,
+            "support": 432.0
+          },
+          "PARAGRAPH": {
+            "precision": 1.0,
+            "recall": 0.9989,
+            "f1-score": 0.9995,
+            "support": 930.0
+          },
+          "DEFINITION": {
+            "precision": 0.9862,
+            "recall": 0.9511,
+            "f1-score": 0.9683,
+            "support": 225.0
+          },
+          "EXAMPLE": {
+            "precision": 0.9951,
+            "recall": 1.0,
+            "f1-score": 0.9976,
+            "support": 204.0
+          },
+          "PROCEDURE": {
+            "precision": 0.9912,
+            "recall": 1.0,
+            "f1-score": 0.9956,
+            "support": 224.0
+          },
+          "IMPORTANT_POINT": {
+            "precision": 1.0,
+            "recall": 0.9856,
+            "f1-score": 0.9927,
+            "support": 208.0
+          },
+          "FORMULA": {
+            "precision": 0.9854,
+            "recall": 1.0,
+            "f1-score": 0.9927,
+            "support": 203.0
+          },
+          "QUESTION": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 197.0
+          },
+          "ANSWER": {
+            "precision": 0.9449,
+            "recall": 1.0,
+            "f1-score": 0.9717,
+            "support": 120.0
+          },
+          "CONCLUSION": {
+            "precision": 1.0,
+            "recall": 0.9844,
+            "f1-score": 0.9921,
+            "support": 64.0
+          },
+          "REFERENCE": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 117.0
+          }
+        },
+        "confusion_matrix": {
+          "labels": [
+            "TITLE",
+            "HEADING",
+            "SUBHEADING",
+            "PARAGRAPH",
+            "DEFINITION",
+            "EXAMPLE",
+            "PROCEDURE",
+            "IMPORTANT_POINT",
+            "FORMULA",
+            "QUESTION",
+            "ANSWER",
+            "CONCLUSION",
+            "REFERENCE"
+          ],
+          "matrix": [
+            [
+              80,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              462,
+              8,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              14,
+              418,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              929,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              214,
+              1,
+              1,
+              0,
+              3,
+              0,
+              6,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              204,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              224,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              2,
+              0,
+              1,
+              205,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              203,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              197,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              120,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              1,
+              63,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              117
+            ]
+          ]
+        }
+      },
+      "train_seconds": 13.2,
+      "embedding": "lsa",
+      "test_macro_f1": 0.9955,
+      "gold_macro_f1": 0.9246
+    }
+  },
+  "test": {
+    "n": 3326,
+    "accuracy": 0.9934,
+    "macro": {
+      "precision": 0.9957,
+      "recall": 0.9954,
+      "f1": 0.9955
+    },
+    "weighted": {
+      "precision": 0.9934,
+      "recall": 0.9934,
+      "f1": 0.9934
+    },
+    "per_class": {
+      "TITLE": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 80.0
+      },
+      "HEADING": {
+        "precision": 0.9784,
+        "recall": 0.9826,
+        "f1-score": 0.9805,
+        "support": 461.0
+      },
+      "SUBHEADING": {
+        "precision": 0.981,
+        "recall": 0.9764,
+        "f1-score": 0.9787,
+        "support": 423.0
+      },
+      "PARAGRAPH": {
+        "precision": 0.9989,
+        "recall": 1.0,
+        "f1-score": 0.9994,
+        "support": 901.0
+      },
+      "DEFINITION": {
+        "precision": 0.9952,
+        "recall": 0.9858,
+        "f1-score": 0.9905,
+        "support": 212.0
+      },
+      "EXAMPLE": {
+        "precision": 0.9955,
+        "recall": 1.0,
+        "f1-score": 0.9978,
+        "support": 222.0
+      },
+      "PROCEDURE": {
+        "precision": 0.995,
+        "recall": 0.995,
+        "f1-score": 0.995,
+        "support": 201.0
+      },
+      "IMPORTANT_POINT": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 215.0
+      },
+      "FORMULA": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 98.0
+      },
+      "QUESTION": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 198.0
+      },
+      "ANSWER": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 134.0
+      },
+      "CONCLUSION": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 65.0
+      },
+      "REFERENCE": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 116.0
+      }
+    },
+    "confusion_matrix": {
+      "labels": [
+        "TITLE",
+        "HEADING",
+        "SUBHEADING",
+        "PARAGRAPH",
+        "DEFINITION",
+        "EXAMPLE",
+        "PROCEDURE",
+        "IMPORTANT_POINT",
+        "FORMULA",
+        "QUESTION",
+        "ANSWER",
+        "CONCLUSION",
+        "REFERENCE"
+      ],
+      "matrix": [
+        [
+          80,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          453,
+          8,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          10,
+          413,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          901,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          1,
+          209,
+          1,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          222,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          200,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          215,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          98,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          198,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          134,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          65,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          116
+        ]
+      ]
+    }
+  },
+  "gold": {
+    "n": 134,
+    "accuracy": 0.9254,
+    "macro": {
+      "precision": 0.9671,
+      "recall": 0.9066,
+      "f1": 0.9284
+    },
+    "weighted": {
+      "precision": 0.9326,
+      "recall": 0.9254,
+      "f1": 0.9235
+    },
+    "per_class": {
+      "TITLE": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 6.0
+      },
+      "HEADING": {
+        "precision": 0.9394,
+        "recall": 0.9118,
+        "f1-score": 0.9254,
+        "support": 34.0
+      },
+      "SUBHEADING": {
+        "precision": 0.8,
+        "recall": 0.8571,
+        "f1-score": 0.8276,
+        "support": 14.0
+      },
+      "PARAGRAPH": {
+        "precision": 0.8333,
+        "recall": 1.0,
+        "f1-score": 0.9091,
+        "support": 25.0
+      },
+      "DEFINITION": {
+        "precision": 1.0,
+        "recall": 0.6,
+        "f1-score": 0.75,
+        "support": 5.0
+      },
+      "EXAMPLE": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 6.0
+      },
+      "PROCEDURE": {
+        "precision": 1.0,
+        "recall": 0.75,
+        "f1-score": 0.8571,
+        "support": 4.0
+      },
+      "IMPORTANT_POINT": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 4.0
+      },
+      "FORMULA": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 2.0
+      },
+      "QUESTION": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 11.0
+      },
+      "ANSWER": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 7.0
+      },
+      "CONCLUSION": {
+        "precision": 1.0,
+        "recall": 0.6667,
+        "f1-score": 0.8,
+        "support": 6.0
+      },
+      "REFERENCE": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 10.0
+      }
+    },
+    "confusion_matrix": {
+      "labels": [
+        "TITLE",
+        "HEADING",
+        "SUBHEADING",
+        "PARAGRAPH",
+        "DEFINITION",
+        "EXAMPLE",
+        "PROCEDURE",
+        "IMPORTANT_POINT",
+        "FORMULA",
+        "QUESTION",
+        "ANSWER",
+        "CONCLUSION",
+        "REFERENCE"
+      ],
+      "matrix": [
+        [
+          6,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          31,
+          3,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          2,
+          12,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          25,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          2,
+          3,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          6,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          3,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          4,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          2,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          11,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          7,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          4,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          10
+        ]
+      ]
+    }
+  }
+}

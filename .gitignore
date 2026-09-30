@@ -36,3 +36,6 @@ datasets/raw/
 .DS_Store
 .idea/
 .vscode/
+
+# Generated datasets (reproducible via python -m backend.ml.train)
+datasets/generated/
