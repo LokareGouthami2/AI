@@ -10,7 +10,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Literal
 
-from pydantic import Field, SecretStr
+from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 BACKEND_DIR = Path(__file__).resolve().parent
@@ -53,6 +53,14 @@ class Settings(BaseSettings):
     cors_origins: list[str] = ["http://localhost:5173", "http://127.0.0.1:5173"]
     api_token: SecretStr | None = None  # optional shared token for deployed demos
     rate_limit_per_minute: int = 60
+
+    @field_validator("api_token", "anthropic_api_key", mode="before")
+    @classmethod
+    def _empty_secret_is_unset(cls, v):
+        # `WRITEAI_API_TOKEN=` in a copied .env.example means "not set".
+        if v is None or (isinstance(v, str) and not v.strip()):
+            return None
+        return v
 
     @property
     def upload_dir(self) -> Path:

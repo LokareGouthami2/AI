@@ -152,7 +152,22 @@ follow the acceptance flow below.
 
 ## Installation
 
-### Local development
+### Fastest: GitHub Codespaces (runs in your browser)
+
+On the GitHub repo page: **Code → Codespaces → Create codespace on this branch**.
+The dev container installs everything (`scripts/setup.sh`, about 2–4 minutes on
+first start), starts the API and web UI (`scripts/dev.sh`), and opens the app in
+a new browser tab. To use Claude, add `ANTHROPIC_API_KEY` to `.env` in the
+Codespace (or as a Codespaces secret) and run `scripts/dev.sh` again.
+
+### One command locally (Linux/macOS)
+
+```bash
+scripts/setup.sh   # once: venv, deps, spaCy model, frontend packages, .env
+scripts/dev.sh     # start → http://localhost:5173  (stop: scripts/dev.sh stop)
+```
+
+### Local development (manual)
 
 ```bash
 # Backend (Python 3.11)

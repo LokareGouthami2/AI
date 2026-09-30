@@ -220,3 +220,14 @@ def test_api_token_enforced(monkeypatch, client):
     monkeypatch.setattr(get_settings(), "api_token", SecretStr("s3cret"))
     assert client.get("/api/documents").status_code == 401
     assert client.get("/api/documents", headers={"X-API-Token": "s3cret"}).status_code == 200
+
+
+def test_empty_secrets_in_env_mean_unset(monkeypatch):
+    """Regression: a .env copied from .env.example has `WRITEAI_API_TOKEN=`;
+    that must not lock every request behind an empty token."""
+    from backend.config import Settings
+
+    monkeypatch.setenv("WRITEAI_API_TOKEN", "")
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "  ")
+    s = Settings()
+    assert s.api_token is None and s.anthropic_api_key is None
