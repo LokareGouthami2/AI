@@ -39,3 +39,4 @@ datasets/raw/
 
 # Generated datasets (reproducible via python -m backend.ml.train)
 datasets/generated/
+.hypothesis/

@@ -22,7 +22,7 @@ class Section:
     level: int  # 0 = document root, 1 = heading, 2 = subheading
     page: int
     items: list[Item] = field(default_factory=list)
-    children: list["Section"] = field(default_factory=list)
+    children: list[Section] = field(default_factory=list)
 
     @property
     def pages(self) -> set[int]:

@@ -1,0 +1,3 @@
+# Optional: semantic embeddings (downloads all-MiniLM-L6-v2 once from Hugging Face).
+# Without it WriteAI uses its deterministic hashing embedder.
+sentence-transformers>=3.0

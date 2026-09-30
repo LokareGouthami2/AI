@@ -89,7 +89,7 @@ class Paragraph(_Strict):
 
 class ListItem(_Strict):
     id: str = Field(default_factory=new_block_id, max_length=64)
-    blocks: list["Block"] = Field(min_length=1)
+    blocks: list[Block] = Field(min_length=1)
 
 
 class BulletList(_Strict):
@@ -108,7 +108,7 @@ class OrderedList(_Strict):
 class Blockquote(_Strict):
     id: str = Field(default_factory=new_block_id, max_length=64)
     type: Literal["blockquote"] = "blockquote"
-    blocks: list["Block"] = Field(min_length=1)
+    blocks: list[Block] = Field(min_length=1)
 
 
 Block = Annotated[
@@ -125,7 +125,7 @@ class WDMDocument(_Strict):
     blocks: list[Block] = Field(default_factory=list)
 
     @model_validator(mode="after")
-    def _limits(self) -> "WDMDocument":
+    def _limits(self) -> WDMDocument:
         count = 0
         for _, depth in iter_blocks_with_depth(self.blocks):
             count += 1
@@ -262,8 +262,28 @@ def content_hash(doc: WDMDocument) -> str:
     return hashlib.sha256(to_canonical_json(doc).encode("utf-8")).hexdigest()
 
 
+def assign_missing_ids(data: dict) -> dict:
+    """Give id-less blocks/list items a deterministic id derived from their
+    position, so saving the same content twice yields the same hash."""
+
+    def walk(nodes, path: str) -> None:
+        if not isinstance(nodes, list):
+            return
+        for i, node in enumerate(nodes):
+            if not isinstance(node, dict):
+                continue
+            p = f"{path}/{i}"
+            if not node.get("id"):
+                node["id"] = "b" + hashlib.sha1(p.encode()).hexdigest()[:10]
+            walk(node.get("blocks"), p + "b")
+            walk(node.get("items"), p + "i")
+
+    walk(data.get("blocks") if isinstance(data, dict) else None, "")
+    return data
+
+
 def parse(data: dict) -> WDMDocument:
-    return WDMDocument.model_validate(data)
+    return WDMDocument.model_validate(assign_missing_ids(data))
 
 
 def dump(doc: WDMDocument) -> dict:

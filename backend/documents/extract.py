@@ -11,8 +11,8 @@ import io
 import logging
 import re
 
-import pymupdf as fitz  # PyMuPDF
 import numpy as np
+import pymupdf as fitz  # PyMuPDF
 
 from backend.documents import ocr
 from backend.documents.types import ExtractedDocument, ExtractedPage, TextLine

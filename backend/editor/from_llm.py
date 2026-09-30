@@ -11,8 +11,8 @@ import re
 
 from backend.editor.wdm import (
     Block,
-    Heading,
     HardBreakNode,
+    Heading,
     Paragraph,
     TextNode,
     WDMDocument,

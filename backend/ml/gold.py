@@ -63,8 +63,8 @@ GOLD_DOCS = {"ml_chapter": ML_CHAPTER, "biology_notes": BIOLOGY_NOTES, "history_
 
 def gold_samples() -> list[dict]:
     """Render each gold doc as PDF and TXT, extract, and align labels."""
-    from backend.ml.dataset import DocSpec, Style, align
     from backend.documents.extract import extract
+    from backend.ml.dataset import DocSpec, Style, align
     from backend.ml.features import segment_samples
     from backend.nlp.preprocess import preprocess
     from backend.tests.fixtures.builders import build_pdf, build_txt

@@ -34,17 +34,21 @@ def to_gray(img: np.ndarray) -> np.ndarray:
 
 
 def estimate_skew(gray: np.ndarray) -> float:
-    """Skew angle in degrees from the minimum-area rectangle of ink pixels."""
+    """Skew angle in degrees (positive = text rotated counter-clockwise),
+    from the minimum-area rectangle around the ink pixels. Normalised to
+    (-45, 45] so it is independent of OpenCV's angle convention."""
     inv = cv2.bitwise_not(gray)
     _, thresh = cv2.threshold(inv, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
-    coords = np.column_stack(np.where(thresh > 0))
-    if len(coords) < 50:
+    ys, xs = np.where(thresh > 0)
+    if len(xs) < 50:
         return 0.0
-    angle = cv2.minAreaRect(coords.astype(np.float32))[-1]
-    # OpenCV >= 4.5 returns angles in [0, 90); map to a small correction.
-    if angle > 45:
+    pts = np.column_stack([xs, ys]).astype(np.float32)
+    angle = float(cv2.minAreaRect(pts)[-1])
+    while angle <= -45:
+        angle += 90
+    while angle > 45:
         angle -= 90
-    return float(-angle) if abs(angle) <= 15 else 0.0
+    return -angle if abs(angle) <= 15 else 0.0
 
 
 def deskew(gray: np.ndarray) -> np.ndarray:
@@ -52,7 +56,7 @@ def deskew(gray: np.ndarray) -> np.ndarray:
     if abs(angle) < 0.3:
         return gray
     h, w = gray.shape
-    m = cv2.getRotationMatrix2D((w / 2, h / 2), angle, 1.0)
+    m = cv2.getRotationMatrix2D((w / 2, h / 2), -angle, 1.0)
     return cv2.warpAffine(gray, m, (w, h), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
 
 

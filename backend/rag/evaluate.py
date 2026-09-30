@@ -10,7 +10,7 @@ Unanswerable questions must be refused (answer = None).
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from backend.config import REPO_ROOT
 from backend.ml.gold import GOLD_DOCS
@@ -91,7 +91,7 @@ def run() -> dict:
     answerable = [r for r in rows if r["answerable"]]
     unanswerable = [r for r in rows if not r["answerable"]]
     metrics = {
-        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "generated_at": datetime.now(UTC).isoformat(),
         "embedder": embedder.name,
         "answer_engine": "offline extractive (LLM answers are not scored here)",
         "n_questions": len(rows),

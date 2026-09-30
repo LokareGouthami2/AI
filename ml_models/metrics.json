@@ -1,13 +1,13 @@
 {
-  "generated_at": "2026-09-30T14:56:29.437421+00:00",
+  "generated_at": "2026-09-30T15:40:00.525446+00:00",
   "selected_model": "tfidf_logreg",
-  "model_version": "tfidf_logreg-202609301456",
+  "model_version": "tfidf_logreg-202609301540",
   "dataset": {
     "docs_per_subject": 40,
     "seed": 13,
     "splits": {
       "train": {
-        "segments": 13631,
+        "segments": 14042,
         "documents": 320,
         "subjects": [
           "biology",
@@ -21,7 +21,7 @@
         ]
       },
       "val": {
-        "segments": 3474,
+        "segments": 3573,
         "documents": 80,
         "subjects": [
           "chemistry",
@@ -29,7 +29,7 @@
         ]
       },
       "test": {
-        "segments": 3326,
+        "segments": 3442,
         "documents": 80,
         "subjects": [
           "mathematics",
@@ -37,37 +37,37 @@
         ]
       }
     },
-    "gold_segments": 134,
+    "gold_segments": 140,
     "label_counts_train": {
       "TITLE": 320,
-      "HEADING": 1878,
-      "SUBHEADING": 1674,
-      "PARAGRAPH": 3666,
-      "DEFINITION": 803,
-      "EXAMPLE": 844,
-      "PROCEDURE": 838,
-      "IMPORTANT_POINT": 862,
-      "FORMULA": 703,
-      "QUESTION": 778,
-      "ANSWER": 513,
-      "CONCLUSION": 259,
-      "REFERENCE": 493
+      "HEADING": 1883,
+      "SUBHEADING": 1676,
+      "PARAGRAPH": 3714,
+      "DEFINITION": 844,
+      "EXAMPLE": 879,
+      "PROCEDURE": 870,
+      "IMPORTANT_POINT": 907,
+      "FORMULA": 794,
+      "QUESTION": 852,
+      "ANSWER": 543,
+      "CONCLUSION": 261,
+      "REFERENCE": 499
     }
   },
   "comparison": {
     "tfidf_logreg": {
       "val": {
-        "n": 3474,
-        "accuracy": 0.9908,
+        "n": 3573,
+        "accuracy": 0.9919,
         "macro": {
-          "precision": 0.9931,
-          "recall": 0.9935,
-          "f1": 0.9933
+          "precision": 0.9932,
+          "recall": 0.9933,
+          "f1": 0.9932
         },
         "weighted": {
-          "precision": 0.9908,
-          "recall": 0.9908,
-          "f1": 0.9908
+          "precision": 0.992,
+          "recall": 0.9919,
+          "f1": 0.9919
         },
         "per_class": {
           "TITLE": {
@@ -90,677 +90,51 @@
           },
           "PARAGRAPH": {
             "precision": 1.0,
-            "recall": 0.9978,
-            "f1-score": 0.9989,
-            "support": 930.0
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 941.0
           },
           "DEFINITION": {
-            "precision": 0.9867,
-            "recall": 0.9867,
-            "f1-score": 0.9867,
-            "support": 225.0
-          },
-          "EXAMPLE": {
-            "precision": 0.9951,
-            "recall": 1.0,
-            "f1-score": 0.9976,
-            "support": 204.0
-          },
-          "PROCEDURE": {
-            "precision": 0.9912,
-            "recall": 1.0,
-            "f1-score": 0.9956,
-            "support": 224.0
-          },
-          "IMPORTANT_POINT": {
             "precision": 1.0,
-            "recall": 0.9856,
-            "f1-score": 0.9927,
-            "support": 208.0
-          },
-          "FORMULA": {
-            "precision": 0.9902,
-            "recall": 1.0,
-            "f1-score": 0.9951,
-            "support": 203.0
-          },
-          "QUESTION": {
-            "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
-            "support": 197.0
-          },
-          "ANSWER": {
-            "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
-            "support": 120.0
-          },
-          "CONCLUSION": {
-            "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
-            "support": 64.0
-          },
-          "REFERENCE": {
-            "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
-            "support": 117.0
-          }
-        },
-        "confusion_matrix": {
-          "labels": [
-            "TITLE",
-            "HEADING",
-            "SUBHEADING",
-            "PARAGRAPH",
-            "DEFINITION",
-            "EXAMPLE",
-            "PROCEDURE",
-            "IMPORTANT_POINT",
-            "FORMULA",
-            "QUESTION",
-            "ANSWER",
-            "CONCLUSION",
-            "REFERENCE"
-          ],
-          "matrix": [
-            [
-              80,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0
-            ],
-            [
-              0,
-              462,
-              8,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0
-            ],
-            [
-              0,
-              16,
-              416,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0
-            ],
-            [
-              0,
-              0,
-              0,
-              928,
-              1,
-              0,
-              0,
-              0,
-              1,
-              0,
-              0,
-              0,
-              0
-            ],
-            [
-              0,
-              0,
-              0,
-              0,
-              222,
-              1,
-              1,
-              0,
-              1,
-              0,
-              0,
-              0,
-              0
-            ],
-            [
-              0,
-              0,
-              0,
-              0,
-              0,
-              204,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0
-            ],
-            [
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              224,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0
-            ],
-            [
-              0,
-              0,
-              0,
-              0,
-              2,
-              0,
-              1,
-              205,
-              0,
-              0,
-              0,
-              0,
-              0
-            ],
-            [
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              203,
-              0,
-              0,
-              0,
-              0
-            ],
-            [
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              197,
-              0,
-              0,
-              0
-            ],
-            [
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              120,
-              0,
-              0
-            ],
-            [
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              64,
-              0
-            ],
-            [
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              117
-            ]
-          ]
-        }
-      },
-      "train_seconds": 14.8,
-      "test_macro_f1": 0.9955,
-      "gold_macro_f1": 0.9284
-    },
-    "tfidf_svm": {
-      "val": {
-        "n": 3474,
-        "accuracy": 0.9873,
-        "macro": {
-          "precision": 0.9912,
-          "recall": 0.9885,
-          "f1": 0.9898
-        },
-        "weighted": {
-          "precision": 0.9875,
-          "recall": 0.9873,
-          "f1": 0.9873
-        },
-        "per_class": {
-          "TITLE": {
-            "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
-            "support": 80.0
-          },
-          "HEADING": {
-            "precision": 0.9666,
-            "recall": 0.9851,
-            "f1-score": 0.9758,
-            "support": 470.0
-          },
-          "SUBHEADING": {
-            "precision": 0.9519,
-            "recall": 0.963,
-            "f1-score": 0.9574,
-            "support": 432.0
-          },
-          "PARAGRAPH": {
-            "precision": 1.0,
-            "recall": 0.9989,
-            "f1-score": 0.9995,
-            "support": 930.0
-          },
-          "DEFINITION": {
-            "precision": 0.9867,
-            "recall": 0.9867,
-            "f1-score": 0.9867,
-            "support": 225.0
-          },
-          "EXAMPLE": {
-            "precision": 0.9951,
-            "recall": 1.0,
-            "f1-score": 0.9976,
-            "support": 204.0
-          },
-          "PROCEDURE": {
-            "precision": 0.9912,
-            "recall": 1.0,
-            "f1-score": 0.9956,
-            "support": 224.0
-          },
-          "IMPORTANT_POINT": {
-            "precision": 1.0,
-            "recall": 0.9856,
-            "f1-score": 0.9927,
-            "support": 208.0
-          },
-          "FORMULA": {
-            "precision": 0.9947,
-            "recall": 0.931,
-            "f1-score": 0.9618,
-            "support": 203.0
-          },
-          "QUESTION": {
-            "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
-            "support": 197.0
-          },
-          "ANSWER": {
-            "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
-            "support": 120.0
-          },
-          "CONCLUSION": {
-            "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
-            "support": 64.0
-          },
-          "REFERENCE": {
-            "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
-            "support": 117.0
-          }
-        },
-        "confusion_matrix": {
-          "labels": [
-            "TITLE",
-            "HEADING",
-            "SUBHEADING",
-            "PARAGRAPH",
-            "DEFINITION",
-            "EXAMPLE",
-            "PROCEDURE",
-            "IMPORTANT_POINT",
-            "FORMULA",
-            "QUESTION",
-            "ANSWER",
-            "CONCLUSION",
-            "REFERENCE"
-          ],
-          "matrix": [
-            [
-              80,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0
-            ],
-            [
-              0,
-              463,
-              7,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0
-            ],
-            [
-              0,
-              16,
-              416,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0
-            ],
-            [
-              0,
-              0,
-              0,
-              929,
-              1,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0
-            ],
-            [
-              0,
-              0,
-              0,
-              0,
-              222,
-              1,
-              1,
-              0,
-              1,
-              0,
-              0,
-              0,
-              0
-            ],
-            [
-              0,
-              0,
-              0,
-              0,
-              0,
-              204,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0
-            ],
-            [
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              224,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0
-            ],
-            [
-              0,
-              0,
-              0,
-              0,
-              2,
-              0,
-              1,
-              205,
-              0,
-              0,
-              0,
-              0,
-              0
-            ],
-            [
-              0,
-              0,
-              14,
-              0,
-              0,
-              0,
-              0,
-              0,
-              189,
-              0,
-              0,
-              0,
-              0
-            ],
-            [
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              197,
-              0,
-              0,
-              0
-            ],
-            [
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              120,
-              0,
-              0
-            ],
-            [
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              64,
-              0
-            ],
-            [
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              117
-            ]
-          ]
-        }
-      },
-      "train_seconds": 19.3,
-      "test_macro_f1": 0.995,
-      "gold_macro_f1": 0.8872
-    },
-    "dense_logreg": {
-      "val": {
-        "n": 3474,
-        "accuracy": 0.9891,
-        "macro": {
-          "precision": 0.9888,
-          "recall": 0.99,
-          "f1": 0.9893
-        },
-        "weighted": {
-          "precision": 0.9892,
-          "recall": 0.9891,
-          "f1": 0.9891
-        },
-        "per_class": {
-          "TITLE": {
-            "precision": 1.0,
-            "recall": 1.0,
-            "f1-score": 1.0,
-            "support": 80.0
-          },
-          "HEADING": {
-            "precision": 0.9706,
             "recall": 0.983,
-            "f1-score": 0.9767,
-            "support": 470.0
-          },
-          "SUBHEADING": {
-            "precision": 0.9812,
-            "recall": 0.9676,
-            "f1-score": 0.9744,
-            "support": 432.0
-          },
-          "PARAGRAPH": {
-            "precision": 1.0,
-            "recall": 0.9989,
-            "f1-score": 0.9995,
-            "support": 930.0
-          },
-          "DEFINITION": {
-            "precision": 0.9862,
-            "recall": 0.9511,
-            "f1-score": 0.9683,
-            "support": 225.0
+            "f1-score": 0.9914,
+            "support": 235.0
           },
           "EXAMPLE": {
-            "precision": 0.9951,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.9976,
-            "support": 204.0
+            "f1-score": 1.0,
+            "support": 214.0
           },
           "PROCEDURE": {
-            "precision": 0.9912,
+            "precision": 1.0,
             "recall": 1.0,
-            "f1-score": 0.9956,
-            "support": 224.0
+            "f1-score": 1.0,
+            "support": 234.0
           },
           "IMPORTANT_POINT": {
             "precision": 1.0,
-            "recall": 0.9856,
-            "f1-score": 0.9927,
-            "support": 208.0
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 214.0
           },
           "FORMULA": {
-            "precision": 0.9854,
+            "precision": 0.9957,
             "recall": 1.0,
-            "f1-score": 0.9927,
-            "support": 203.0
+            "f1-score": 0.9978,
+            "support": 229.0
           },
           "QUESTION": {
             "precision": 1.0,
             "recall": 1.0,
             "f1-score": 1.0,
-            "support": 197.0
+            "support": 220.0
           },
           "ANSWER": {
-            "precision": 0.9449,
+            "precision": 0.9685,
             "recall": 1.0,
-            "f1-score": 0.9717,
-            "support": 120.0
+            "f1-score": 0.984,
+            "support": 123.0
           },
           "CONCLUSION": {
             "precision": 1.0,
@@ -824,8 +198,8 @@
             ],
             [
               0,
-              14,
-              418,
+              16,
+              416,
               0,
               0,
               0,
@@ -841,39 +215,39 @@
               0,
               0,
               0,
-              929,
+              941,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              231,
+              0,
+              0,
+              0,
               1,
               0,
-              0,
-              0,
-              0,
-              0,
-              0,
+              3,
               0,
               0
             ],
             [
+              0,
               0,
               0,
               0,
               0,
               214,
-              1,
-              1,
-              0,
-              3,
-              0,
-              6,
-              0,
-              0
-            ],
-            [
-              0,
-              0,
-              0,
-              0,
-              0,
-              204,
               0,
               0,
               0,
@@ -889,7 +263,7 @@
               0,
               0,
               0,
-              224,
+              234,
               0,
               0,
               0,
@@ -902,26 +276,11 @@
               0,
               0,
               0,
-              2,
-              0,
-              1,
-              205,
               0,
               0,
               0,
+              214,
               0,
-              0
-            ],
-            [
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              203,
               0,
               0,
               0,
@@ -936,8 +295,23 @@
               0,
               0,
               0,
+              229,
               0,
-              197,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              220,
               0,
               0,
               0
@@ -953,7 +327,7 @@
               0,
               0,
               0,
-              120,
+              123,
               0,
               0
             ],
@@ -990,24 +364,650 @@
           ]
         }
       },
-      "train_seconds": 13.2,
+      "train_seconds": 13.4,
+      "test_macro_f1": 0.9969,
+      "gold_macro_f1": 0.9332
+    },
+    "tfidf_svm": {
+      "val": {
+        "n": 3573,
+        "accuracy": 0.9913,
+        "macro": {
+          "precision": 0.9928,
+          "recall": 0.9932,
+          "f1": 0.993
+        },
+        "weighted": {
+          "precision": 0.9914,
+          "recall": 0.9913,
+          "f1": 0.9913
+        },
+        "per_class": {
+          "TITLE": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 80.0
+          },
+          "HEADING": {
+            "precision": 0.9686,
+            "recall": 0.9851,
+            "f1-score": 0.9768,
+            "support": 470.0
+          },
+          "SUBHEADING": {
+            "precision": 0.9835,
+            "recall": 0.9653,
+            "f1-score": 0.9743,
+            "support": 432.0
+          },
+          "PARAGRAPH": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 941.0
+          },
+          "DEFINITION": {
+            "precision": 1.0,
+            "recall": 0.9617,
+            "f1-score": 0.9805,
+            "support": 235.0
+          },
+          "EXAMPLE": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 214.0
+          },
+          "PROCEDURE": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 234.0
+          },
+          "IMPORTANT_POINT": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 214.0
+          },
+          "FORMULA": {
+            "precision": 0.9703,
+            "recall": 1.0,
+            "f1-score": 0.9849,
+            "support": 229.0
+          },
+          "QUESTION": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 220.0
+          },
+          "ANSWER": {
+            "precision": 0.984,
+            "recall": 1.0,
+            "f1-score": 0.9919,
+            "support": 123.0
+          },
+          "CONCLUSION": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 64.0
+          },
+          "REFERENCE": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 117.0
+          }
+        },
+        "confusion_matrix": {
+          "labels": [
+            "TITLE",
+            "HEADING",
+            "SUBHEADING",
+            "PARAGRAPH",
+            "DEFINITION",
+            "EXAMPLE",
+            "PROCEDURE",
+            "IMPORTANT_POINT",
+            "FORMULA",
+            "QUESTION",
+            "ANSWER",
+            "CONCLUSION",
+            "REFERENCE"
+          ],
+          "matrix": [
+            [
+              80,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              463,
+              7,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              15,
+              417,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              941,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              226,
+              0,
+              0,
+              0,
+              7,
+              0,
+              2,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              214,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              234,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              214,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              229,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              220,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              123,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              64,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              117
+            ]
+          ]
+        }
+      },
+      "train_seconds": 18.1,
+      "test_macro_f1": 0.9962,
+      "gold_macro_f1": 0.897
+    },
+    "dense_logreg": {
+      "val": {
+        "n": 3573,
+        "accuracy": 0.991,
+        "macro": {
+          "precision": 0.9913,
+          "recall": 0.9922,
+          "f1": 0.9917
+        },
+        "weighted": {
+          "precision": 0.9912,
+          "recall": 0.991,
+          "f1": 0.991
+        },
+        "per_class": {
+          "TITLE": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 80.0
+          },
+          "HEADING": {
+            "precision": 0.9686,
+            "recall": 0.983,
+            "f1-score": 0.9757,
+            "support": 470.0
+          },
+          "SUBHEADING": {
+            "precision": 0.9812,
+            "recall": 0.9653,
+            "f1-score": 0.9732,
+            "support": 432.0
+          },
+          "PARAGRAPH": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 941.0
+          },
+          "DEFINITION": {
+            "precision": 1.0,
+            "recall": 0.966,
+            "f1-score": 0.9827,
+            "support": 235.0
+          },
+          "EXAMPLE": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 214.0
+          },
+          "PROCEDURE": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 234.0
+          },
+          "IMPORTANT_POINT": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 214.0
+          },
+          "FORMULA": {
+            "precision": 0.9913,
+            "recall": 1.0,
+            "f1-score": 0.9957,
+            "support": 229.0
+          },
+          "QUESTION": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 220.0
+          },
+          "ANSWER": {
+            "precision": 0.9462,
+            "recall": 1.0,
+            "f1-score": 0.9723,
+            "support": 123.0
+          },
+          "CONCLUSION": {
+            "precision": 1.0,
+            "recall": 0.9844,
+            "f1-score": 0.9921,
+            "support": 64.0
+          },
+          "REFERENCE": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 117.0
+          }
+        },
+        "confusion_matrix": {
+          "labels": [
+            "TITLE",
+            "HEADING",
+            "SUBHEADING",
+            "PARAGRAPH",
+            "DEFINITION",
+            "EXAMPLE",
+            "PROCEDURE",
+            "IMPORTANT_POINT",
+            "FORMULA",
+            "QUESTION",
+            "ANSWER",
+            "CONCLUSION",
+            "REFERENCE"
+          ],
+          "matrix": [
+            [
+              80,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              462,
+              8,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              15,
+              417,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              941,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              227,
+              0,
+              0,
+              0,
+              2,
+              0,
+              6,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              214,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              234,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              214,
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              229,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              220,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              123,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              1,
+              63,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              117
+            ]
+          ]
+        }
+      },
+      "train_seconds": 12.6,
       "embedding": "lsa",
-      "test_macro_f1": 0.9955,
-      "gold_macro_f1": 0.9246
+      "test_macro_f1": 0.997,
+      "gold_macro_f1": 0.9332
     }
   },
   "test": {
-    "n": 3326,
-    "accuracy": 0.9934,
+    "n": 3442,
+    "accuracy": 0.9948,
     "macro": {
-      "precision": 0.9957,
-      "recall": 0.9954,
-      "f1": 0.9955
+      "precision": 0.9969,
+      "recall": 0.9968,
+      "f1": 0.9969
     },
     "weighted": {
-      "precision": 0.9934,
-      "recall": 0.9934,
-      "f1": 0.9934
+      "precision": 0.9948,
+      "recall": 0.9948,
+      "f1": 0.9948
     },
     "per_class": {
       "TITLE": {
@@ -1029,52 +1029,52 @@
         "support": 423.0
       },
       "PARAGRAPH": {
-        "precision": 0.9989,
+        "precision": 1.0,
         "recall": 1.0,
-        "f1-score": 0.9994,
-        "support": 901.0
+        "f1-score": 1.0,
+        "support": 912.0
       },
       "DEFINITION": {
-        "precision": 0.9952,
-        "recall": 0.9858,
-        "f1-score": 0.9905,
-        "support": 212.0
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 231.0
       },
       "EXAMPLE": {
-        "precision": 0.9955,
+        "precision": 1.0,
         "recall": 1.0,
-        "f1-score": 0.9978,
-        "support": 222.0
+        "f1-score": 1.0,
+        "support": 230.0
       },
       "PROCEDURE": {
-        "precision": 0.995,
-        "recall": 0.995,
-        "f1-score": 0.995,
-        "support": 201.0
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 207.0
       },
       "IMPORTANT_POINT": {
         "precision": 1.0,
         "recall": 1.0,
         "f1-score": 1.0,
-        "support": 215.0
+        "support": 233.0
       },
       "FORMULA": {
         "precision": 1.0,
         "recall": 1.0,
         "f1-score": 1.0,
-        "support": 98.0
+        "support": 115.0
       },
       "QUESTION": {
         "precision": 1.0,
         "recall": 1.0,
         "f1-score": 1.0,
-        "support": 198.0
+        "support": 223.0
       },
       "ANSWER": {
         "precision": 1.0,
         "recall": 1.0,
         "f1-score": 1.0,
-        "support": 134.0
+        "support": 146.0
       },
       "CONCLUSION": {
         "precision": 1.0,
@@ -1155,7 +1155,7 @@
           0,
           0,
           0,
-          901,
+          912,
           0,
           0,
           0,
@@ -1170,24 +1170,9 @@
           0,
           0,
           0,
-          1,
-          209,
-          1,
-          1,
           0,
+          231,
           0,
-          0,
-          0,
-          0,
-          0
-        ],
-        [
-          0,
-          0,
-          0,
-          0,
-          0,
-          222,
           0,
           0,
           0,
@@ -1201,9 +1186,9 @@
           0,
           0,
           0,
-          1,
           0,
-          200,
+          230,
+          0,
           0,
           0,
           0,
@@ -1218,8 +1203,23 @@
           0,
           0,
           0,
+          207,
           0,
-          215,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          233,
           0,
           0,
           0,
@@ -1235,7 +1235,7 @@
           0,
           0,
           0,
-          98,
+          115,
           0,
           0,
           0,
@@ -1251,7 +1251,7 @@
           0,
           0,
           0,
-          198,
+          223,
           0,
           0,
           0
@@ -1267,7 +1267,7 @@
           0,
           0,
           0,
-          134,
+          146,
           0,
           0
         ],
@@ -1305,17 +1305,17 @@
     }
   },
   "gold": {
-    "n": 134,
-    "accuracy": 0.9254,
+    "n": 140,
+    "accuracy": 0.9286,
     "macro": {
-      "precision": 0.9671,
-      "recall": 0.9066,
-      "f1": 0.9284
+      "precision": 0.9675,
+      "recall": 0.9181,
+      "f1": 0.9332
     },
     "weighted": {
-      "precision": 0.9326,
-      "recall": 0.9254,
-      "f1": 0.9235
+      "precision": 0.9353,
+      "recall": 0.9286,
+      "f1": 0.9255
     },
     "per_class": {
       "TITLE": {
@@ -1337,16 +1337,16 @@
         "support": 14.0
       },
       "PARAGRAPH": {
-        "precision": 0.8333,
+        "precision": 0.8387,
         "recall": 1.0,
-        "f1-score": 0.9091,
-        "support": 25.0
+        "f1-score": 0.9123,
+        "support": 26.0
       },
       "DEFINITION": {
         "precision": 1.0,
-        "recall": 0.6,
-        "f1-score": 0.75,
-        "support": 5.0
+        "recall": 0.5,
+        "f1-score": 0.6667,
+        "support": 6.0
       },
       "EXAMPLE": {
         "precision": 1.0,
@@ -1356,33 +1356,33 @@
       },
       "PROCEDURE": {
         "precision": 1.0,
-        "recall": 0.75,
-        "f1-score": 0.8571,
+        "recall": 1.0,
+        "f1-score": 1.0,
         "support": 4.0
       },
       "IMPORTANT_POINT": {
         "precision": 1.0,
         "recall": 1.0,
         "f1-score": 1.0,
-        "support": 4.0
+        "support": 5.0
       },
       "FORMULA": {
         "precision": 1.0,
         "recall": 1.0,
         "f1-score": 1.0,
-        "support": 2.0
+        "support": 3.0
       },
       "QUESTION": {
         "precision": 1.0,
         "recall": 1.0,
         "f1-score": 1.0,
-        "support": 11.0
+        "support": 12.0
       },
       "ANSWER": {
         "precision": 1.0,
         "recall": 1.0,
         "f1-score": 1.0,
-        "support": 7.0
+        "support": 8.0
       },
       "CONCLUSION": {
         "precision": 1.0,
@@ -1463,7 +1463,7 @@
           0,
           0,
           0,
-          25,
+          26,
           0,
           0,
           0,
@@ -1478,7 +1478,7 @@
           0,
           0,
           0,
-          2,
+          3,
           3,
           0,
           0,
@@ -1508,22 +1508,6 @@
           0,
           0,
           0,
-          1,
-          0,
-          0,
-          3,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0
-        ],
-        [
-          0,
-          0,
-          0,
-          0,
           0,
           0,
           0,
@@ -1532,20 +1516,6 @@
           0,
           0,
           0,
-          0
-        ],
-        [
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          2,
-          0,
-          0,
           0,
           0
         ],
@@ -1557,9 +1527,9 @@
           0,
           0,
           0,
+          5,
           0,
           0,
-          11,
           0,
           0,
           0
@@ -1573,9 +1543,39 @@
           0,
           0,
           0,
+          3,
           0,
           0,
-          7,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          12,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          8,
           0,
           0
         ],

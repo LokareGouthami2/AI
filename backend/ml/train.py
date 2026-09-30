@@ -20,7 +20,7 @@ import argparse
 import json
 import logging
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import joblib
@@ -229,11 +229,11 @@ def main(argv: list[str] | None = None) -> dict:
         comparison[name]["gold_macro_f1"] = evaluate(m, gold, [s["label"] for s in gold])["macro"]["f1"]
 
     args.out.mkdir(parents=True, exist_ok=True)
-    version = datetime.now(timezone.utc).strftime("%Y%m%d%H%M")
+    version = datetime.now(UTC).strftime("%Y%m%d%H%M")
     artefact = {"model": model, "name": best, "version": f"{best}-{version}", "labels": LABELS}
     joblib.dump(artefact, args.out / "section_classifier.joblib", compress=3)
     metrics = {
-        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "generated_at": datetime.now(UTC).isoformat(),
         "selected_model": best,
         "model_version": artefact["version"],
         "dataset": {

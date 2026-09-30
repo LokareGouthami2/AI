@@ -104,7 +104,19 @@ class Segment:
         return asdict(self)
 
 
-def _same_block(prev: TextLine, cur: TextLine, prev_seg_lines: int) -> bool:
+def _typical_line_gap(lines: list[TextLine]) -> float:
+    """Median vertical gap between consecutive same-size lines on a page —
+    the document's own leading. Paragraph breaks are gaps clearly above it."""
+    gaps = []
+    for a, b in zip(lines, lines[1:]):
+        if a.page == b.page and a.text and b.text and abs(a.font_size - b.font_size) < 0.6:
+            g = b.bbox[1] - a.bbox[3]
+            if -2 < g < a.font_size * 2:
+                gaps.append(g)
+    return statistics.median(gaps) if gaps else 2.0
+
+
+def _same_block(prev: TextLine, cur: TextLine, prev_seg_lines: int, lead_gap: float = 2.0) -> bool:
     if cur.source in ("docx",):
         return False  # DOCX paragraphs are already logical blocks
     if prev.page != cur.page or not prev.text or not cur.text:
@@ -117,6 +129,8 @@ def _same_block(prev: TextLine, cur: TextLine, prev_seg_lines: int) -> bool:
     gap = cur.bbox[1] - prev.bbox[3]
     if gap > 0.9 * line_h or gap < -line_h:
         return False
+    if prev.source == "text_layer" and gap > lead_gap + 0.3 * prev.font_size:
+        return False  # extra paragraph spacing
     # A short previous line ending a sentence usually ends a paragraph.
     prev_width = prev.bbox[2] - prev.bbox[0]
     if prev.source != "txt" and prev_width > 0 and re.search(r"[.:!?]$", prev.text):
@@ -130,6 +144,7 @@ def merge_lines(doc: ExtractedDocument) -> list[Segment]:
     segments: list[Segment] = []
     page_dims = {p.number: (p.width or 595.0, p.height or 842.0) for p in doc.pages}
     lines = [ln for ln in doc.lines]
+    lead_gap = _typical_line_gap(lines)
     cur: list[TextLine] = []
 
     def flush(next_line: TextLine | None) -> None:
@@ -176,7 +191,7 @@ def merge_lines(doc: ExtractedDocument) -> list[Segment]:
         if not ln.text.strip():
             flush(ln)
             continue
-        if cur and not _same_block(cur[-1], ln, len(cur)):
+        if cur and not _same_block(cur[-1], ln, len(cur), lead_gap):
             flush(ln)
         cur.append(ln)
     flush(None)
