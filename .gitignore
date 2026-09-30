@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Node
+node_modules/
+dist/
+coverage/
+playwright-report/
+test-results/
+
+# Env & secrets
+.env
+.env.*
+!.env.example
+
+# Runtime data
+data/
+uploads/
+renders/
+chroma/
+*.db
+*.sqlite3
+
+# Datasets (raw sources are not redistributed)
+datasets/raw/
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
