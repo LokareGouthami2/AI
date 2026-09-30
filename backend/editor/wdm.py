@@ -187,6 +187,20 @@ def count_empty_paragraphs(doc: WDMDocument) -> int:
     return sum(1 for b in iter_text_blocks(doc) if isinstance(b, Paragraph) and not b.content)
 
 
+def count_blank_lines(doc: WDMDocument) -> int:
+    """Empty paragraphs that render as blank lines. An empty paragraph that is
+    the first block of a list item is drawn as its bullet/number instead
+    (exactly what the editor shows), so it is not a blank line."""
+    marker_empties = 0
+    for b, _ in iter_blocks_with_depth(doc.blocks):
+        if isinstance(b, (BulletList, OrderedList)):
+            for item in b.items:
+                first = item.blocks[0]
+                if isinstance(first, Paragraph) and not first.content:
+                    marker_empties += 1
+    return count_empty_paragraphs(doc) - marker_empties
+
+
 def count_hard_breaks(doc: WDMDocument) -> int:
     return sum(
         1 for b in iter_text_blocks(doc) for n in b.content if isinstance(n, HardBreakNode)

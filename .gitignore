@@ -40,3 +40,6 @@ datasets/raw/
 # Generated datasets (reproducible via python -m backend.ml.train)
 datasets/generated/
 .hypothesis/
+frontend/test-results/
+frontend/playwright-report/
+frontend/blob-report/

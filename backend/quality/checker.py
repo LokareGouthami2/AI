@@ -15,7 +15,7 @@ import pymupdf as fitz  # PyMuPDF
 from backend.editor.wdm import (
     TextNode,
     WDMDocument,
-    count_empty_paragraphs,
+    count_blank_lines,
     count_hard_breaks,
     document_tokens,
     iter_text_blocks,
@@ -131,7 +131,7 @@ def check_layout(doc: WDMDocument, dl: DisplayList) -> QualityReport:
 
     # 5. Line breaks preserved.
     checks.append("line_breaks")
-    exp_blank = count_empty_paragraphs(doc) - dl.stats["trimmed_trailing_blank"]
+    exp_blank = count_blank_lines(doc) - dl.stats["trimmed_trailing_blank"]
     if dl.stats["blank_lines"] != exp_blank:
         errors.append(Issue("BLANK_LINES", f"expected {exp_blank} blank line(s), rendered {dl.stats['blank_lines']}"))
     if dl.stats["hard_breaks"] != count_hard_breaks(doc):

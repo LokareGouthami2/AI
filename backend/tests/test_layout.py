@@ -247,3 +247,15 @@ def test_regression_collision_near_page_bottom_moves_line_to_next_page():
             dl = layout(d, RenderSettings(style=style, line_spacing=spacing, paragraph_spacing=0))
             r = check_layout(d, dl)
             assert not [e for e in r.errors if e.code in ("OVERLAP", "OVERFLOW")], (style, spacing, r.to_dict()["errors"][:2])
+
+
+def test_regression_empty_list_item_renders_marker_not_blank_line():
+    """Found by the browser acceptance test: Backspace can turn an emptied
+    paragraph into an empty list item. It renders as its marker, and the
+    checker must not expect a blank line for it."""
+    empty_item = wdm.ListItem(blocks=[wdm.Paragraph()])
+    d = wdm.WDMDocument(blocks=[wdm.BulletList(items=[wdm.ListItem(blocks=[wdm.para("item")]), empty_item]), wdm.Paragraph(), wdm.para("after")])
+    dl = layout(d, RenderSettings())
+    assert "".join(g.ch for g in dl.pages[0].glyphs if g.marker) == "••"
+    assert dl.stats["blank_lines"] == 1
+    assert check_layout(d, dl).passed

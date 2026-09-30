@@ -11,37 +11,12 @@ import copy
 import pymupdf
 
 from backend.editor import wdm
+from backend.quality.pdf_inspect import count_ink_underlines, pdf_lines
 from backend.tests.conftest import wait_job
 
 
 def _texts(content: dict) -> list[str]:
     return [wdm.block_plain_text(b) for b in wdm.iter_text_blocks(wdm.parse(content))]
-
-
-def pdf_lines(pdf: bytes) -> list[tuple[int, float, str, float]]:
-    """(page, y, text, max_font_size) for every text line in the PDF body."""
-    out = []
-    with pymupdf.open(stream=pdf, filetype="pdf") as d:
-        for pno, page in enumerate(d, start=1):
-            for block in page.get_text("dict")["blocks"]:
-                for line in block.get("lines", []):
-                    text = "".join(s["text"] for s in line["spans"]).strip()
-                    if text and "WriteAI" not in text and not text.startswith("–"):
-                        out.append((pno, line["bbox"][1], text, max(s["size"] for s in line["spans"])))
-    return out
-
-
-def count_ink_underlines(pdf: bytes) -> int:
-    from backend.handwriting.styles import INKS
-
-    n = 0
-    with pymupdf.open(stream=pdf, filetype="pdf") as d:
-        for page in d:
-            for dr in page.get_drawings():
-                col = dr.get("color")
-                if col and any(max(abs(col[i] - ink[i]) for i in range(3)) < 0.02 for ink in INKS.values()):
-                    n += sum(1 for it in dr["items"] if it[0] == "l" and abs(it[1].y - it[2].y) < 3)
-    return n
 
 
 def test_critical_acceptance_flow(client, pdf_bytes):
@@ -104,7 +79,7 @@ def test_critical_acceptance_flow(client, pdf_bytes):
     pdf = client.get(j["result"]["download_url"]).content
 
     # 14. Verify
-    lines = pdf_lines(pdf)
+    lines = [(ln["page"], ln["y"], ln["text"], ln["size"]) for ln in pdf_lines(pdf)]
     all_text = " ".join(t for _, _, t, _ in lines)
     assert deleted_text[:40] not in all_text, "deleted paragraph must be absent"
     assert new_para in all_text, "new paragraph must exist"

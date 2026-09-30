@@ -51,6 +51,9 @@ def rate_limit(bucket: str, per_minute: int | None = None):
         if s.env == "test":
             return
         client = request.client.host if request.client else "unknown"
-        limiter.check(client, bucket, per_minute or s.rate_limit_per_minute)
+        # Per-route limits are relative to the default of 60/min, so one
+        # setting (WRITEAI_RATE_LIMIT_PER_MINUTE) scales them all.
+        scale = max(1.0, s.rate_limit_per_minute / 60)
+        limiter.check(client, bucket, int((per_minute or s.rate_limit_per_minute) * scale))
 
     return dep
