@@ -26,6 +26,21 @@ test.describe('editor keyboard & clipboard', () => {
     expect(texts).toEqual(['Machine Learning', 'Machine learning is a branch of AI.', '', 'Typed after a blank line.', 'It allows computers to learn from data.', 'There are three major types.']);
   });
 
+  test('Ctrl+End / Ctrl+Home work in the Edit + Preview layout', async ({ page, request }) => {
+    await page.goto(`/documents/${id}/editor`);
+    const ed = page.getByTestId('editor-content');
+    await page.getByTestId('mode-split').click();
+    await ed.getByText('It allows computers').click();
+    await page.keyboard.press(`${MOD}+End`);
+    await page.keyboard.type(' END');
+    await page.keyboard.press(`${MOD}+Home`);
+    await page.keyboard.type('START ');
+    await waitSaved(page);
+    const texts = paragraphTexts((await savedContent(request, id)).content);
+    expect(texts[0]).toBe('START Machine Learning');
+    expect(texts.at(-1)).toBe('There are three major types. END');
+  });
+
   test('Shift+Enter inserts a line break inside the paragraph', async ({ page, request }) => {
     const ed = await openEditor(page, id);
     await ed.getByText('There are three major types.').click();

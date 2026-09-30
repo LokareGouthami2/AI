@@ -6,6 +6,7 @@ import { PasteSanitizer } from './PasteSanitizer.js';
 import { MoveBlock } from './MoveBlock.js';
 import { HistoryShortcuts } from './HistoryShortcuts.js';
 import { SmartBackspace } from './SmartBackspace.js';
+import { DocNavigation } from './DocNavigation.js';
 
 /**
  * The editor schema is deliberately closed: only nodes/marks the handwriting
@@ -32,5 +33,6 @@ export function editorExtensions() {
     MoveBlock,
     HistoryShortcuts,
     SmartBackspace,
+    DocNavigation,
   ];
 }
