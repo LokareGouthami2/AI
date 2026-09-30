@@ -1,0 +1,6 @@
+*.ps1 text eol=crlf
+*.sh text eol=lf
+*.ttf binary
+*.joblib binary
+*.png binary
+*.pdf binary

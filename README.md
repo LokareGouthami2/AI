@@ -160,6 +160,20 @@ first start), starts the API and web UI (`scripts/dev.sh`), and opens the app in
 a new browser tab. To use Claude, add `ANTHROPIC_API_KEY` to `.env` in the
 Codespace (or as a Codespaces secret) and run `scripts/dev.sh` again.
 
+### Windows (PowerShell)
+
+Install [Git](https://git-scm.com/download/win), [Python 3.11+](https://www.python.org/downloads/)
+(tick "Add python.exe to PATH") and [Node.js 22 LTS](https://nodejs.org/), then:
+
+```powershell
+cd $HOME
+git clone https://github.com/LokareGouthami2/AI
+cd AI
+git checkout claude/writeai-2-0-platform-3ch69p
+powershell -ExecutionPolicy Bypass -File scripts\setup.ps1   # once
+powershell -ExecutionPolicy Bypass -File scripts\dev.ps1     # starts and opens http://localhost:5173
+```
+
 ### One command locally (Linux/macOS)
 
 ```bash
