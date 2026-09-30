@@ -2,8 +2,9 @@
 
 > **Understand. Edit. Learn. Create.**
 >
-> Status: **Phase 0 — design approved-pending.** No implementation code exists yet.
-> This document is the contract that every later phase is built and tested against.
+> Status: **Implemented.** This is the original up-front design. The system as built,
+> including deliberate deviations, is described in [architecture.md](architecture.md);
+> measured results are in [evaluation.md](evaluation.md).
 
 ---
 
@@ -470,16 +471,16 @@ Question ─► normalise ─► embed ─► dense top-20 ─┐               
   "title": "Machine Learning",
   "blocks": [
     { "id": "b1", "type": "heading", "level": 1, "align": "left",
-      "content": [ { "text": "Introduction" } ] },
+      "content": [ { "type": "text", "text": "Introduction" } ] },
     { "id": "b2", "type": "paragraph", "align": "left",
-      "content": [ { "text": "Machine learning is " },
-                   { "text": "a branch of AI", "marks": ["bold"] },
+      "content": [ { "type": "text", "text": "Machine learning is " },
+                   { "type": "text", "text": "a branch of AI", "marks": ["bold"] },
                    { "type": "hard_break" },
-                   { "text": "It allows computers to learn from data." } ] },
+                   { "type": "text", "text": "It allows computers to learn from data." } ] },
     { "id": "b3", "type": "paragraph", "align": "left", "content": [] },
     { "id": "b4", "type": "ordered_list", "start": 1,
       "items": [ { "blocks": [ { "id": "b5", "type": "paragraph",
-                                 "content": [ { "text": "Supervised Learning" } ] } ] } ] },
+                                 "content": [ { "type": "text", "text": "Supervised Learning" } ] } ] } ] },
     { "id": "b6", "type": "blockquote", "blocks": [ ... ] }
   ]
 }

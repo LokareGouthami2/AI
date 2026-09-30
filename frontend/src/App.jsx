@@ -1,12 +1,16 @@
+import { Suspense, lazy } from 'react';
 import { NavLink, Navigate, Route, Routes, Link } from 'react-router-dom';
 import Landing from './pages/Landing.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import Upload from './pages/Upload.jsx';
 import DocumentShell from './pages/DocumentShell.jsx';
 import Analysis from './pages/Analysis.jsx';
-import EditorPage from './pages/EditorPage.jsx';
 import Study from './pages/Study.jsx';
 import RenderPage from './pages/RenderPage.jsx';
+import { Spinner } from './components/ui.jsx';
+
+// The editor (TipTap/ProseMirror) is the heaviest chunk: load it on demand.
+const EditorPage = lazy(() => import('./pages/EditorPage.jsx'));
 
 export default function App() {
   return (
@@ -29,7 +33,7 @@ export default function App() {
           <Route path="/documents/:id" element={<DocumentShell />}>
             <Route index element={<Navigate to="analysis" replace />} />
             <Route path="analysis" element={<Analysis />} />
-            <Route path="editor" element={<EditorPage />} />
+            <Route path="editor" element={<Suspense fallback={<Spinner label="Loading editor…" />}><EditorPage /></Suspense>} />
             <Route path="study" element={<Study />} />
             <Route path="render" element={<RenderPage />} />
           </Route>

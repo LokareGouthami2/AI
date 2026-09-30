@@ -43,3 +43,4 @@ datasets/generated/
 frontend/test-results/
 frontend/playwright-report/
 frontend/blob-report/
+docker/.ca-test.crt

@@ -1,0 +1,13 @@
+.git
+.venv
+data
+**/node_modules
+frontend/dist
+frontend/test-results
+frontend/playwright-report
+datasets/generated
+datasets/raw
+screenshots
+**/__pycache__
+.hypothesis
+.env

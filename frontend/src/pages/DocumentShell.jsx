@@ -1,10 +1,12 @@
-import { NavLink, Outlet, useParams } from 'react-router-dom';
+import { NavLink, Outlet, useLocation, useParams } from 'react-router-dom';
 import { api } from '../services/api.js';
 import { ErrorAlert, StatusBadge, useAsync } from '../components/ui.jsx';
 
 export default function DocumentShell() {
   const { id } = useParams();
-  const [{ data: doc, error }] = useAsync(() => api.getDocument(id), [id]);
+  const { pathname } = useLocation();
+  // Refetch on tab change so status/title reflect generation and edits.
+  const [{ data: doc, error }] = useAsync(() => api.getDocument(id), [id, pathname]);
   const tab = (to, label) => (
     <NavLink to={`/documents/${id}/${to}`} className={({ isActive }) => (isActive ? 'active' : '')}>
       {label}
