@@ -13,16 +13,48 @@ import pymupdf
 from backend.handwriting.styles import INKS
 
 
+def trace_chars(page) -> list[tuple[str, float, float, float]]:
+    """(char, x, y, size) for every drawn character in content-stream order
+    (the order WriteAI draws: line by line, word by word). Unlike layout-based
+    extraction this is robust to rotated/jittered handwriting glyphs."""
+    out = []
+    for span in page.get_texttrace():
+        # Fill+stroke text is traced once per pass: keep fill (0) and invisible (3).
+        if span.get("type") not in (0, 3):
+            continue
+        for c in span["chars"]:
+            ch = chr(c[0]) if c[0] > 0 else ""
+            out.append((ch, c[2][0], c[2][1], span["size"]))
+    return out
+
+
+def page_lines(page, clip=None) -> list[dict]:
+    """Group traced characters into text lines (a new line starts when the
+    baseline jumps by more than half a font size)."""
+    lines: list[dict] = []
+    cur = None
+    for ch, x, y, size in trace_chars(page):
+        if clip is not None and not (clip.x0 <= x <= clip.x1 and clip.y0 <= y <= clip.y1):
+            continue
+        if cur is None or abs(y - cur["y"]) > 0.5 * max(size, cur["size"] * 0.8):
+            cur = {"y": y, "text": "", "size": size}
+            lines.append(cur)
+        cur["text"] += ch
+        cur["size"] = max(cur["size"], size) if ch.strip() else cur["size"]
+    for ln in lines:
+        ln["text"] = " ".join(ln["text"].split())
+    return [ln for ln in lines if ln["text"]]
+
+
 def pdf_lines(pdf: bytes) -> list[dict]:
-    """Every text line in the body: page, y (top), text, max font size."""
+    """Every body text line: page, y (baseline), text, font size."""
     out = []
     with pymupdf.open(stream=pdf, filetype="pdf") as d:
         for pno, page in enumerate(d, start=1):
-            for block in page.get_text("dict")["blocks"]:
-                for line in block.get("lines", []):
-                    text = "".join(s["text"] for s in line["spans"]).strip()
-                    if text and "WriteAI" not in text and not text.startswith("–"):
-                        out.append({"page": pno, "y": round(line["bbox"][1], 2), "text": text, "size": round(max(s["size"] for s in line["spans"]), 2)})
+            for ln in page_lines(page):
+                if "WriteAI" in ln["text"] or ln["text"].startswith("–"):
+                    continue
+                out.append({"page": pno, "y": round(ln["y"], 2), "text": ln["text"], "size": round(ln["size"], 2)})
     return out
 
 

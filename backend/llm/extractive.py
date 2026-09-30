@@ -166,12 +166,8 @@ def _notes(tree: DocumentTree, mode: str) -> NotesOutput:
         if not blocks:
             blocks = []
         sections.append(NoteSection(heading=heading, level=2 if sec.level == 2 else 1, blocks=blocks, source_pages=_section_pages(sec)))
-    title = tree.title
-    if mode == "simple":
-        title = f"{tree.title} — Simply Explained"
-    elif mode == "smart":
-        title = f"{tree.title} — Smart Notes"
-    return NotesOutput(title=title, sections=sections)
+    # Keep the document's own title (no "— Smart Notes" style suffixes).
+    return NotesOutput(title=tree.title, sections=sections)
 
 
 def task_clean(tree: DocumentTree, **_) -> NotesOutput:

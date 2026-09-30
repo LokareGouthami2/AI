@@ -54,7 +54,13 @@ def _draw_paper(c: canvas.Canvas, dl: DisplayList) -> None:
             x += step
 
 
-def render_pdf(dl: DisplayList, meta: dict | None = None) -> bytes:
+def render_pdf(dl: DisplayList, meta: dict | None = None, text_layer_only: bool = False) -> bytes:
+    """Vector PDF of the display list.
+
+    ``text_layer_only`` draws nothing visible: every glyph in invisible render
+    mode, without rotation, and no paper/decorations. It is laid over the
+    raster pages of a "scanned" PDF so the document stays searchable and
+    auditable."""
     meta = meta or {}
     s = dl.settings
     ink = INKS[s.ink]
@@ -63,12 +69,13 @@ def render_pdf(dl: DisplayList, meta: dict | None = None) -> bytes:
     c.setTitle(meta.get("title", "WriteAI document"))
     c.setAuthor("WriteAI 2.0")
     c.setCreator("WriteAI 2.0 handwriting engine")
-    c.setSubject("Computer-generated handwriting-style document")
+    c.setSubject("Handwritten notes")
     c.setKeywords(";".join(f"writeai:{k}={v}" for k, v in sorted(meta.items()) if k != "title"))
     style = STYLES[s.style]
 
     for page in dl.pages:
-        _draw_paper(c, dl)
+        if not text_layer_only:
+            _draw_paper(c, dl)
         # Glyphs: one text object per line; per-glyph text matrix gives
         # jitter (translation) and slant (shear) without rotating the baseline.
         by_line: dict[int, list] = {}
@@ -78,7 +85,17 @@ def render_pdf(dl: DisplayList, meta: dict | None = None) -> bytes:
             c.saveState()  # text render mode is graphics state: isolate each line
             t = c.beginText()
             prev = None
+            started = False
             for g in glyphs:
+                if not g.marker and not started:
+                    started = True
+                    if not g.cont:
+                        # Invisible space at the start of every line: readers
+                        # (and the audit) see a word boundary between lines.
+                        t.setTextRenderMode(3)
+                        t.setFont(g.font, g.size)
+                        t.setTextTransform(1, 0, 0, 1, g.x - g.size * 0.3, g.y)
+                        t.textOut(" ")
                 if g.word_start and prev is not None:
                     # Real space character between words: keeps the PDF's text
                     # layer (copy/paste, search, audit) word-accurate.
@@ -89,17 +106,32 @@ def render_pdf(dl: DisplayList, meta: dict | None = None) -> bytes:
                 prev = g
                 col = _mix(ink, g.shade)
                 t.setFillColorRGB(*col)
-                if g.fake_bold:
+                stroke = max(0.25, g.size * 0.035) if g.fake_bold else g.weight
+                if text_layer_only:
+                    t.setTextRenderMode(3)
+                    t.setFont(g.font, g.size)
+                    t.setTextTransform(1, 0, 0, 1, g.x, g.y)
+                    t.textOut(g.ch)
+                    continue
+                if stroke > 0.05:
+                    # Fill + thin stroke: bold without a bold cut, or a word
+                    # pressed harder with the pen. ("w" is legal inside BT/ET.)
                     t.setStrokeColorRGB(*col)
                     t.setTextRenderMode(2)
-                    c.setLineWidth(max(0.25, g.size * 0.035))
+                    t._code.append(f"{stroke:.3f} w")
                 else:
                     t.setTextRenderMode(0)
                 t.setFont(g.font, g.size)
-                t.setTextTransform(1, 0, math.tan(math.radians(g.skew)), 1, g.x, g.y)
+                # Text matrix = rotation (hand movement) x shear (slant).
+                r, k = math.radians(g.rot), math.tan(math.radians(g.skew))
+                cr, sr = math.cos(r), math.sin(r)
+                t.setTextTransform(cr, sr, cr * k - sr, sr * k + cr, g.x, g.y)
                 t.textOut(g.ch)
             c.drawText(t)
             c.restoreState()
+        if text_layer_only:
+            c.showPage()
+            continue
         c.setStrokeColorRGB(*ink)
         c.setLineCap(1)
         for d in page.decorations:

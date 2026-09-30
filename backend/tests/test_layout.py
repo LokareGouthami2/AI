@@ -259,3 +259,48 @@ def test_regression_empty_list_item_renders_marker_not_blank_line():
     assert "".join(g.ch for g in dl.pages[0].glyphs if g.marker) == "••"
     assert dl.stats["blank_lines"] == 1
     assert check_layout(d, dl).passed
+
+
+# ------------------------------------------------------------ scanned output
+
+
+def _scan(doc, s):
+    from backend.services.render import build_pdf
+
+    dl = layout(doc, s, "h")
+    return dl, build_pdf(dl, s, {"content_hash": "h", "revision": 1}, 100)
+
+
+def test_scanned_output_is_images_with_searchable_text_layer():
+    d = long_doc(1)
+    dl, (pdf, vector) = _scan(d, RenderSettings(output="scanned"))
+    assert pdf is not vector
+    with pymupdf.open(stream=pdf) as doc:
+        assert doc.page_count == len(dl.pages)
+        assert all(page.get_images() for page in doc)  # every page is a scan image
+        assert not doc[0].get_drawings()  # no vector strokes left visible
+    a = audit_pdf(d, dl, pdf, {"content_hash": "h"}, check_strokes=False)
+    assert a.passed and a.metrics["text_similarity"] == 1.0
+    assert pdf_metadata(pdf)["content_hash"] == "h"
+
+
+def test_scanned_output_is_deterministic_and_seed_dependent():
+    d = long_doc(1)
+    _, (a, _) = _scan(d, RenderSettings(output="scanned", seed=1))
+    _, (b, _) = _scan(d, RenderSettings(output="scanned", seed=1))
+    _, (c, _) = _scan(d, RenderSettings(output="scanned", seed=2))
+
+    def pixels(pdf):  # compare rendered pages (the PDF file ID is random)
+        with pymupdf.open(stream=pdf) as doc:
+            return [p.get_pixmap(dpi=40).samples for p in doc]
+
+    assert pixels(a) == pixels(b) and pixels(a) != pixels(c)
+
+
+def test_clean_output_stays_vector_and_watermark_is_off_by_default():
+    d = long_doc(1)
+    dl, (pdf, vector) = _scan(d, RenderSettings(output="clean"))
+    assert pdf is vector
+    assert RenderSettings().watermark is False
+    with pymupdf.open(stream=pdf) as doc:
+        assert "WriteAI" not in doc[0].get_text()

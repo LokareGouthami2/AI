@@ -55,7 +55,11 @@ content hash of the exact revision it came from.
   output and pasted web content can't bring it in.
 * **Live preview**, with an Edit / Edit + Preview / Preview switch and an
   explicit "Update Preview".
-* **Handwriting:**
+* **Handwriting that looks scanned:**
+  - by default each page looks like a real handwritten sheet run through a
+    scanner (paper texture, lighting, slight tilt, soft ink, per-letter
+    variation), with an invisible text layer so it stays searchable;
+  - a clean digital look is also available;
   - 6 styles, blue or black ink, ruled/blank/grid paper;
   - size, line spacing, paragraph spacing and margins;
   - page numbers, variation amount and seed.
@@ -286,9 +290,10 @@ save → preview → PDF → verify) is automated in a real browser in
 
 ## Ethical considerations
 
-WriteAI is meant for **personal study notes**. Generated pages carry a
-"Generated with WriteAI" footer by default. Handing in computer-generated
-"handwriting" as your own work may violate academic-integrity rules.
+WriteAI is meant for **personal study notes**. An optional "Generated with
+WriteAI" footer can be switched on in the handwriting settings. Handing in
+computer-generated "handwriting" as your own work may violate
+academic-integrity rules.
 AI-generated notes can be wrong, which is why everything is editable and
 answers cite their source pages. Document text is sent to the configured LLM
 provider only when an AI mode is used with an API key; Preserve mode and the

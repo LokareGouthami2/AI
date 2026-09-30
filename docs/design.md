@@ -829,7 +829,7 @@ head hash. **The editor is declared complete only when this test passes in CI.**
 | Font licensing | Legal | Only OFL/Apache fonts, licences shipped in repo |
 | LLM cost/latency on long docs | Slow, expensive | Map-reduce, cheaper model for simple tasks, caching generations by (doc hash, mode, prompt version) |
 | Concurrent edits in two tabs | Overwrites | Optimistic concurrency (`base_revision`, 409) |
-| Misuse: passing off generated "handwritten" work as one's own | Academic dishonesty | Ethics section, optional visible "Generated with WriteAI" footer (on by default), documented intended use (personal study notes) |
+| Misuse: passing off generated "handwritten" work as one's own | Academic dishonesty | Ethics section, optional visible "Generated with WriteAI" footer (off by default since v2.0.1, user choice), documented intended use (personal study notes) |
 
 ---
 

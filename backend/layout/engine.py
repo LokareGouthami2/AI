@@ -42,6 +42,7 @@ HEADING_SCALE = {1: 1.5, 2: 1.28, 3: 1.12}
 SIZE_MULT = {None: 1.0, "normal": 1.0, "small": 0.85, "large": 1.2, "xlarge": 1.4}
 INDENT_EM = 1.6  # list / quote indent per level, in font-size units
 MIN_READABLE_PT = 9.0
+ROT_SIGMA = 1.1  # degrees; per-letter rotation (bounded at 2 sigma)
 
 
 # ---------------------------------------------------------------------------
@@ -64,6 +65,9 @@ class Glyph:
     line_id: int
     advance: float
     word_start: bool = False
+    rot: float = 0.0  # small per-letter rotation in degrees (hand movement)
+    weight: float = 0.0  # extra stroke width in pt (pen pressure)
+    cont: bool = False  # first glyph of a line that continues a force-broken word
 
 
 @dataclass
@@ -242,7 +246,8 @@ class _Measurer:
     def variation_bound(self, size: float, width: float) -> float:
         """Upper bound on vertical displacement from drift, slope and jitter."""
         st, v = self.style, self.v
-        return 2 * st.drift * v * self.s.font_size + 2 * 0.003 * v * width + 2 * st.baseline_var * v * size
+        rot = math.sin(math.radians(2 * ROT_SIGMA * v)) * size  # per-letter rotation
+        return 2 * st.drift * v * self.s.font_size + 2 * 0.003 * v * width + 2 * st.baseline_var * v * size + rot
 
     def typical_extent(self, size: float) -> tuple[float, float]:
         """Typical ascender height / descender depth of the style's typeface."""
@@ -419,6 +424,10 @@ def layout(doc: WDMDocument, settings: RenderSettings, content_hash: str = "") -
                 continue
             break
         lb.slot, lb.slots = slot, end_slot - slot + 1
+        if continued_word:
+            first = next((g for g in mine if not g.marker), None)
+            if first is not None:
+                first.cont = True
         if continued_word and words:
             tokens[-1] += words[0]  # rejoin a force-broken word
             words = words[1:]
@@ -651,11 +660,15 @@ def _place_line(page: PageOut, f: Flow, wl: WrappedLine, baseline: float, x0: fl
             x += gap
         skew = style.slant_deg + bounded_gauss(rng, style.slant_var * v)
         shade = 0.84 + rng.random() * 0.16
+        # Pen pressure: a subtle, continuous variation in stroke weight.
+        weight = rng.uniform(0.0, 0.011) * s.font_size * min(v, 1.5)
         words_out.append("".join(c.ch for c in word))
         for ci, c in enumerate(word):
             dy = drift + slope * (x - start) + bounded_gauss(rng, style.baseline_var * v * c.size)
             y = baseline + dy
-            page.glyphs.append(Glyph(c.ch, x, y, c.size, c.font, skew + (10.0 if c.italic else 0.0), shade, c.fake_bold, c.underline, False, line_id, c.adv, ci == 0 and wi > 0))
+            rot = bounded_gauss(rng, ROT_SIGMA * v)
+            letter_shade = shade * (1.0 - rng.uniform(0.0, 0.07 * min(v, 1.5)))  # ink flow varies per letter
+            page.glyphs.append(Glyph(c.ch, x, y, c.size, c.font, skew + (10.0 if c.italic else 0.0), letter_shade, c.fake_bold, c.underline, False, line_id, c.adv, ci == 0 and wi > 0, rot, weight))
             lo, hi = fonts.font(c.font).ink_bounds(c.ch)
             ink_top = max(ink_top, y + hi * c.size)
             ink_bottom = min(ink_bottom, y + lo * c.size)

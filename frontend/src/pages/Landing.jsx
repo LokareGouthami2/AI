@@ -39,8 +39,7 @@ export default function Landing() {
           ))}
         </div>
         <p className="small muted" style={{ marginTop: 24 }}>
-          Intended for personal study notes. Generated pages carry a small “Generated with WriteAI” footer by default —
-          please don't submit computer-generated handwriting as your own.
+          Intended for personal study notes.
         </p>
       </section>
     </div>

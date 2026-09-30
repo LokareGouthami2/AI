@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { api } from '../services/api.js';
 
 export const DEFAULT_SETTINGS = {
-  style: 'neat',
+  style: 'quick',
   ink: 'blue',
   paper: 'ruled',
   page_size: 'A4',
@@ -14,7 +14,8 @@ export const DEFAULT_SETTINGS = {
   margin_left_mm: 28,
   margin_right_mm: 15,
   page_numbers: true,
-  watermark: true,
+  watermark: false,
+  output: 'scanned',
   variation: 1,
   seed: 0,
 };
@@ -42,6 +43,13 @@ export default function SettingsPanel({ settings, onChange, compact = false }) {
           {(styles.length ? styles : [{ id: settings.style, label: settings.style }]).map((s) => (
             <option key={s.id} value={s.id}>{s.label}</option>
           ))}
+        </select>
+      </label>
+      <label className="field">
+        <span>Look</span>
+        <select className="select" value={settings.output} onChange={(e) => set('output')(e.target.value)} data-testid="output-look">
+          <option value="scanned">Scanned handwritten page</option>
+          <option value="clean">Clean digital page</option>
         </select>
       </label>
       <label className="field">
@@ -89,8 +97,8 @@ export default function SettingsPanel({ settings, onChange, compact = false }) {
       <label className="field">
         <span>“Generated with WriteAI” footer</span>
         <select className="select" value={settings.watermark ? 'yes' : 'no'} onChange={(e) => set('watermark')(e.target.value === 'yes')}>
-          <option value="yes">Show (recommended)</option>
           <option value="no">Hide</option>
+          <option value="yes">Show</option>
         </select>
       </label>
     </div>

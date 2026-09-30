@@ -71,7 +71,7 @@ Uploaded documents are untrusted input. Defences in depth:
 
 ## Ethics
 
-Generated pages carry a small "Generated with WriteAI" footer by default, and
+An optional "Generated with WriteAI" footer (off by default) is available, and
 the UI states the intended use (personal study notes). Submitting
 computer-generated handwriting as one's own work may breach academic-integrity
 rules.

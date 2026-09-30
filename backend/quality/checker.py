@@ -23,6 +23,7 @@ from backend.editor.wdm import (
 from backend.handwriting.styles import INKS, PAPER_BG
 from backend.layout import fonts
 from backend.layout.engine import MIN_READABLE_PT, DisplayList, glyphs_collide
+from backend.quality.pdf_inspect import trace_chars
 
 TOL = 0.75  # points
 
@@ -204,10 +205,11 @@ def check_layout(doc: WDMDocument, dl: DisplayList) -> QualityReport:
     return QualityReport(not errors, errors, warnings, metrics, checks)
 
 
-def _pdf_tokens(pdf: bytes, dl: DisplayList) -> tuple[list[str], int, int]:
-    """Words drawn inside the text box (markers excluded), underline strokes, pages."""
+def _pdf_tokens(pdf: bytes, dl: DisplayList, check_strokes: bool = True) -> tuple[list[str], int, int]:
+    """Words drawn inside the text box (markers excluded), in drawing order;
+    ink-coloured horizontal strokes (underlines); page count."""
     x0, y0, x1, y1 = dl.box
-    tokens: list[str] = []
+    chars: list[str] = []
     ul_strokes = 0
     ink = INKS[dl.settings.ink]
     with fitz.open(stream=pdf, filetype="pdf") as d:
@@ -216,13 +218,14 @@ def _pdf_tokens(pdf: bytes, dl: DisplayList) -> tuple[list[str], int, int]:
             H = page.rect.height
             clip = fitz.Rect(x0 - 40, H - y1 - 4, x1 + 4, H - y0 + 4)
             markers = [fitz.Rect(mx0, H - my1, mx1, H - my0) for mx0, my0, mx1, my1 in pout.markers]
-            words = page.get_text("words", clip=clip, sort=False)
-            words.sort(key=lambda w: (w[5], w[6], w[7]))  # block, line, word order
-            for w in words:
-                r = fitz.Rect(w[:4])
-                if any(r.intersects(m) and abs(r.x0 - m.x0) < 3 for m in markers):
+            for ch, x, y, _ in trace_chars(page):
+                p = fitz.Point(x, y)
+                if not clip.contains(p) or any(m.contains(p) for m in markers):
                     continue
-                tokens.append(w[4])
+                chars.append(ch)
+            chars.append(" ")
+            if not check_strokes:
+                continue
             for dr in page.get_drawings():
                 col = dr.get("color")
                 if not col or max(abs(col[i] - ink[i]) for i in range(3)) > 0.02:
@@ -232,16 +235,18 @@ def _pdf_tokens(pdf: bytes, dl: DisplayList) -> tuple[list[str], int, int]:
                         p1, p2 = item[1], item[2]
                         if abs(p1.y - p2.y) < 3 and abs(p2.x - p1.x) > 1:
                             ul_strokes += 1
-    return tokens, ul_strokes, n_pages
+    return "".join(chars).split(), ul_strokes, n_pages
 
 
-def audit_pdf(doc: WDMDocument, dl: DisplayList, pdf: bytes, expected_meta: dict) -> QualityReport:
-    """Post-render: read the PDF back and compare with the edited document."""
+def audit_pdf(doc: WDMDocument, dl: DisplayList, pdf: bytes, expected_meta: dict, check_strokes: bool = True) -> QualityReport:
+    """Post-render: read the PDF back and compare with the edited document.
+    ``check_strokes=False`` for scanned output (strokes are pixels there; the
+    underline audit runs on the vector PDF before scanning)."""
     from backend.pdf.render import pdf_metadata
 
     errors: list[Issue] = []
     warnings: list[Issue] = []
-    tokens, ul_strokes, n_pages = _pdf_tokens(pdf, dl)
+    tokens, ul_strokes, n_pages = _pdf_tokens(pdf, dl, check_strokes)
     expected = document_tokens(doc)
     diff = _token_diff(expected, tokens)
     if expected != tokens:
@@ -252,7 +257,7 @@ def audit_pdf(doc: WDMDocument, dl: DisplayList, pdf: bytes, expected_meta: dict
         else:
             warnings.append(Issue("PDF_TEXT_EXTRACTION", "minor differences reading text back from handwriting glyphs", None, diff))
     ul_expected = sum(1 for p in dl.pages for d in p.decorations if d.kind == "underline")
-    if ul_strokes != ul_expected:
+    if check_strokes and ul_strokes != ul_expected:
         errors.append(Issue("PDF_UNDERLINE_MISMATCH", f"PDF contains {ul_strokes} underline stroke(s); expected {ul_expected}"))
     if n_pages != len(dl.pages):
         errors.append(Issue("PDF_PAGE_COUNT", f"PDF has {n_pages} pages; layout has {len(dl.pages)}"))

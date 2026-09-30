@@ -14,6 +14,8 @@ from backend.layout.engine import layout
 from backend.layout.settings import RenderSettings, settings_hash
 from backend.models.entities import Document, RenderJob, RenderSettingsRow, utcnow
 from backend.pdf.render import rasterize, render_pdf
+from backend.pdf.scan import FINAL_DPI, scanned_pdf
+from backend.pdf.scan import PREVIEW_DPI as SCAN_PREVIEW_DPI
 from backend.quality.checker import audit_pdf, check_layout
 from backend.services import content as content_service
 from backend.services.errors import AppError, not_found
@@ -45,6 +47,18 @@ def _pinned_head(db: Session, document_id: str, expected_revision: int):
     return head, wdm.parse(head.content)
 
 
+def build_pdf(dl, settings: RenderSettings, meta: dict, dpi: int) -> tuple[bytes, bytes]:
+    """(output PDF, vector PDF). For "scanned" output the visible pages are
+    scan-processed images with an invisible text layer; the vector PDF is
+    kept for the underline audit."""
+    visible = render_pdf(dl, meta)
+    if settings.output == "clean":
+        return visible, visible
+    layer = render_pdf(dl, meta, text_layer_only=True)
+    seed_key = f"{meta.get('content_hash', '')}:{settings.seed}"
+    return scanned_pdf(visible, layer, seed_key, dpi=dpi), visible
+
+
 def _meta(head, title: str, s_hash: str) -> dict:
     return {"content_hash": head.content_hash, "revision": head.revision, "settings_hash": s_hash[:16], "title": title}
 
@@ -69,7 +83,7 @@ def preview(db: Session, document_id: str, expected_revision: int, settings: Ren
     else:
         dl = layout(doc, s, head.content_hash)
         report = check_layout(doc, dl)
-        pdf = render_pdf(dl, _meta(head, doc.title, s_hash))
+        pdf, _ = build_pdf(dl, s, _meta(head, doc.title, s_hash), SCAN_PREVIEW_DPI)
         pngs = rasterize(pdf, dpi=PREVIEW_DPI)
         paths = []
         for i, png in enumerate(pngs, start=1):
@@ -100,8 +114,16 @@ def render_final(document_id: str, expected_revision: int, settings: dict | None
     output_path = None
     pdf_audit = None
     if report.passed:
-        pdf = render_pdf(dl, meta)
-        audit = audit_pdf(doc, dl, pdf, {"content_hash": head_hash, "revision": revision})
+        pdf, vector = build_pdf(dl, s, meta, FINAL_DPI)
+        expected = {"content_hash": head_hash, "revision": revision}
+        audit = audit_pdf(doc, dl, vector, expected)
+        if pdf is not vector:
+            # Scanned output: also read the final file's text layer back.
+            scan_audit = audit_pdf(doc, dl, pdf, expected, check_strokes=False)
+            audit.errors += scan_audit.errors
+            audit.warnings += scan_audit.warnings
+            audit.passed = audit.passed and scan_audit.passed
+            audit.checks = audit.checks + ["scan_text_layer"]
         pdf_audit = audit.to_dict()
         if audit.passed:
             out = storage.render_dir_for(document_id) / f"final-{head_hash[:16]}-{s_hash[:16]}.pdf"

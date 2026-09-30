@@ -14,7 +14,7 @@ HandwritingStyle = Literal["neat", "casual", "cursive", "playful", "quick", "lig
 class RenderSettings(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    style: HandwritingStyle = "neat"
+    style: HandwritingStyle = "quick"
     ink: Literal["blue", "black"] = "blue"
     paper: Literal["ruled", "blank", "grid"] = "ruled"
     page_size: Literal["A4", "Letter"] = "A4"
@@ -26,7 +26,8 @@ class RenderSettings(BaseModel):
     margin_left_mm: float = Field(default=28.0, ge=5.0, le=60.0)
     margin_right_mm: float = Field(default=15.0, ge=5.0, le=60.0)
     page_numbers: bool = True
-    watermark: bool = True
+    watermark: bool = False  # optional small "Generated with WriteAI" footer
+    output: Literal["scanned", "clean"] = "scanned"  # scanned-document look or clean vector PDF
     variation: float = Field(default=1.0, ge=0.0, le=2.0, description="handwriting irregularity multiplier")
     seed: int = Field(default=0, ge=0, le=1_000_000)
 
