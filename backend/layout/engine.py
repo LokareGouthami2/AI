@@ -72,7 +72,7 @@ class Glyph:
 
 @dataclass
 class Decoration:
-    kind: str  # underline | quote_bar
+    kind: str  # underline | quote_bar | heading_rule
     x1: float
     y1: float
     x2: float
@@ -108,6 +108,34 @@ class PageOut:
 
 
 @dataclass
+class HeaderBand:
+    """Page furniture above the text box (assignment sheets): handwritten
+    header lines at the top-left, the header rule, and a top-right page
+    number. Computed once here so the text box always clears it."""
+
+    size: float  # header handwriting size (pt)
+    lines: list[tuple[str, float, float]]  # (text, x, baseline y)
+    page_number_y: float | None  # baseline of a top-right page number
+    rule_y: float | None  # y of the horizontal header line
+
+
+def header_band(s: RenderSettings, W: float, H: float) -> HeaderBand | None:
+    texts = [t for t in (s.header_name, s.header_id) if t]
+    top_number = s.page_numbers and s.page_number_position == "top-right"
+    if not texts and not top_number and s.paper != "assignment":
+        return None
+    size = max(10.0, s.font_size * 0.9) * STYLES[s.style].size_scale
+    y = H - 8 * MM - 0.75 * size
+    lines = []
+    for t in texts:
+        lines.append((t, s.margin_left_mm * MM, y))
+        y -= 1.3 * size
+    lowest = lines[-1][2] if lines else H - 8 * MM - 0.75 * size
+    rule_y = (lowest - 0.6 * size) if s.paper == "assignment" else None
+    return HeaderBand(size, lines, H - 8 * MM - 0.75 * size if top_number else None, rule_y)
+
+
+@dataclass
 class DisplayList:
     settings: RenderSettings
     width: float
@@ -117,6 +145,7 @@ class DisplayList:
     slots_per_page: int
     pages: list[PageOut]
     stats: dict = field(default_factory=dict)
+    header: HeaderBand | None = None
 
     def all_lines(self) -> list[LineBox]:
         return [ln for p in self.pages for ln in p.lines]
@@ -351,6 +380,13 @@ def layout(doc: WDMDocument, settings: RenderSettings, content_hash: str = "") -
     W, H = PAGE_SIZES[s.page_size]
     x0, x1 = s.margin_left_mm * MM, W - s.margin_right_mm * MM
     y_top, y_bottom = H - s.margin_top_mm * MM, s.margin_bottom_mm * MM
+    band = header_band(s, W, H)
+    if band is not None:
+        # The first line's ascenders must stay clear of the header.
+        floor = band.rule_y if band.rule_y is not None else min((y for _, _, y in band.lines), default=H) - 0.4 * band.size
+        if band.page_number_y is not None:
+            floor = min(floor, band.page_number_y - 0.4 * band.size)
+        y_top = min(y_top, floor - 0.25 * s.font_size * s.line_spacing)
     m = _Measurer(s)
     lh = s.font_size * s.line_spacing
     box_w = x1 - x0
@@ -582,7 +618,7 @@ def layout(doc: WDMDocument, settings: RenderSettings, content_hash: str = "") -
         style=style.name,
         content_hash=content_hash,
     )
-    return DisplayList(s, W, H, (x0, y_bottom, x1, y_top), lh, slots_per_page, pages, stats)
+    return DisplayList(s, W, H, (x0, y_bottom, x1, y_top), lh, slots_per_page, pages, stats, band)
 
 
 def glyphs_collide(upper: list[Glyph], lower: list[Glyph], tol: float = 0.3) -> bool:
@@ -683,6 +719,12 @@ def _place_line(page: PageOut, f: Flow, wl: WrappedLine, baseline: float, x0: fl
             x += c.adv
     if underline_run is not None:
         _close_underline(page, underline_run, baseline, drift, slope, start, ul_width, line_id, s)
+    if s.underline_headings and f.heading_level and words_out and not any(c.underline for w in wl.words for c in w):
+        # Opt-in hand-drawn rule under a heading line (a little past each end).
+        pad = 0.15 * s.font_size
+        y1 = baseline + drift + slope * (-pad) - 0.2 * s.font_size
+        y2 = baseline + drift + slope * (x - start + pad) - 0.2 * s.font_size
+        page.decorations.append(Decoration("heading_rule", start - pad, y1, x + pad, y2, ul_width, line_id))
 
     if f.quote:
         top = baseline + 0.95 * s.font_size

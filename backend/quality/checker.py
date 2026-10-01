@@ -190,6 +190,14 @@ def check_layout(doc: WDMDocument, dl: DisplayList) -> QualityReport:
             under = [g for g in p.glyphs if g.line_id == d.line_id and not g.marker and g.x >= d.x1 - 0.01 and g.x + g.advance <= d.x2 + 0.01]
             if any(not g.underline for g in under):
                 errors.append(Issue("UNWANTED_UNDERLINE", "underline drawn under text that is not marked underline", p.number))
+    # Heading rules are a separate, opt-in render setting: only under heading
+    # lines, and only when the user switched "underline headings" on.
+    rules = [(p, d) for p in dl.pages for d in p.decorations if d.kind == "heading_rule"]
+    heading_lines = {(p.number, ln.id) for p in dl.pages for ln in p.lines if ln.kind == "heading"}
+    if rules and not dl.settings.underline_headings:
+        errors.append(Issue("UNWANTED_UNDERLINE", f"{len(rules)} heading rule(s) drawn but heading underlines are off"))
+    if any((p.number, d.line_id) not in heading_lines for p, d in rules):
+        errors.append(Issue("UNWANTED_UNDERLINE", "heading rule drawn under a line that is not a heading"))
 
     metrics = {
         "pages": len(dl.pages),
@@ -198,6 +206,7 @@ def check_layout(doc: WDMDocument, dl: DisplayList) -> QualityReport:
         "hard_breaks": dl.stats["hard_breaks"],
         "tokens": len(actual),
         "underline_segments": len(ul_decos),
+        "heading_rules": len(rules),
         "min_font_size": round(min_size, 2),
         "contrast_ratio": round(cr, 2),
         "fill_ratio": round(sum(len(p.lines) for p in dl.pages) / max(1, len(dl.pages) * dl.slots_per_page), 3),

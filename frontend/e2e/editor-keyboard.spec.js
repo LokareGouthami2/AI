@@ -4,7 +4,7 @@
  * handwriting renderer will receive.
  */
 import { expect, test } from '@playwright/test';
-import { H, MOD, P, createDocWithContent, openEditor, paragraphTexts, savedContent, selectText, waitSaved } from './helpers.js';
+import { H, MOD, P, clickInto, createDocWithContent, openEditor, paragraphTexts, savedContent, selectText, waitSaved } from './helpers.js';
 
 const BASE = [H(1, 'Machine Learning'), P('Machine learning is a branch of AI.'), P('It allows computers to learn from data.'), P('There are three major types.')];
 
@@ -16,7 +16,7 @@ test.describe('editor keyboard & clipboard', () => {
 
   test('Enter creates new paragraphs; Enter twice leaves a blank line', async ({ page, request }) => {
     const ed = await openEditor(page, id);
-    await ed.getByText('Machine learning is a branch of AI.').click();
+    await clickInto(page, ed, 'Machine learning is a branch of AI.');
     await page.keyboard.press('End');
     await page.keyboard.press('Enter');
     await page.keyboard.press('Enter');
@@ -30,7 +30,7 @@ test.describe('editor keyboard & clipboard', () => {
     await page.goto(`/documents/${id}/editor`);
     const ed = page.getByTestId('editor-content');
     await page.getByTestId('mode-split').click();
-    await ed.getByText('It allows computers').click();
+    await clickInto(page, ed, 'It allows computers');
     await page.keyboard.press(`${MOD}+End`);
     await page.keyboard.type(' END');
     await page.keyboard.press(`${MOD}+Home`);
@@ -43,7 +43,7 @@ test.describe('editor keyboard & clipboard', () => {
 
   test('Shift+Enter inserts a line break inside the paragraph', async ({ page, request }) => {
     const ed = await openEditor(page, id);
-    await ed.getByText('There are three major types.').click();
+    await clickInto(page, ed, 'There are three major types.');
     await page.keyboard.press('End');
     await page.keyboard.press('Shift+Enter');
     await page.keyboard.type('Same paragraph, new line.');
@@ -55,11 +55,11 @@ test.describe('editor keyboard & clipboard', () => {
 
   test('Backspace and Delete merge paragraphs; Home/End/arrows move the cursor', async ({ page, request }) => {
     const ed = await openEditor(page, id);
-    await ed.getByText('It allows computers to learn from data.').click();
+    await clickInto(page, ed, 'It allows computers to learn from data.');
     await page.keyboard.press('Home');
     await page.keyboard.press('Backspace'); // merge into previous paragraph
     await page.keyboard.type(' ');
-    await ed.getByText('There are three major types.').click();
+    await clickInto(page, ed, 'There are three major types.');
     await page.keyboard.press('End');
     await page.keyboard.press('ArrowLeft');
     await page.keyboard.type('!'); // before the final period
@@ -84,7 +84,7 @@ test.describe('editor keyboard & clipboard', () => {
     const ed = await openEditor(page, id);
     await selectText(page, 'three');
     await page.keyboard.press(`${MOD}+c`);
-    await ed.getByText('It allows computers to learn from data.').click();
+    await clickInto(page, ed, 'It allows computers to learn from data.');
     await page.keyboard.press('End');
     await page.keyboard.type(' ');
     await page.keyboard.press(`${MOD}+v`);
@@ -99,7 +99,7 @@ test.describe('editor keyboard & clipboard', () => {
 
   test('undo and redo (keyboard and toolbar)', async ({ page, request }) => {
     const ed = await openEditor(page, id);
-    await ed.getByText('There are three major types.').click();
+    await clickInto(page, ed, 'There are three major types.');
     await page.keyboard.press('End');
     await page.keyboard.type(' Extra sentence.');
     await expect(ed).toContainText('Extra sentence.');
@@ -119,12 +119,12 @@ test.describe('editor keyboard & clipboard', () => {
   test('toolbar formatting; underline only when chosen', async ({ page, request }) => {
     const ed = await openEditor(page, id);
     // Headings via toolbar
-    await ed.getByText('There are three major types.').click();
+    await clickInto(page, ed, 'There are three major types.');
     await page.getByTestId('tb-h2').click();
     // Bold on one word, underline on another
     await selectText(page, 'branch');
     await page.getByTestId('tb-bold').click();
-    await ed.getByText('It allows computers to learn from data.').click();
+    await clickInto(page, ed, 'It allows computers to learn from data.');
     await page.keyboard.press('End');
     await page.keyboard.press('Shift+ArrowLeft');
     await page.keyboard.press('Shift+ArrowLeft');
@@ -133,9 +133,9 @@ test.describe('editor keyboard & clipboard', () => {
     await page.keyboard.press('Shift+ArrowLeft');
     await page.getByTestId('tb-underline').click();
     // Lists and alignment
-    await ed.getByText('Machine learning is a branch of AI.').click();
+    await clickInto(page, ed, 'Machine learning is a branch of AI.');
     await page.getByTestId('tb-bullet').click();
-    await ed.getByText('It allows computers to learn from').click();
+    await clickInto(page, ed, 'It allows computers to learn from');
     await page.getByTestId('tb-center').click();
     await waitSaved(page);
     const c = (await savedContent(request, id)).content;
@@ -151,7 +151,7 @@ test.describe('editor keyboard & clipboard', () => {
 
   test('pasting underlined web content does not bring underline in', async ({ page, request }) => {
     const ed = await openEditor(page, id);
-    await ed.getByText('There are three major types.').click();
+    await clickInto(page, ed, 'There are three major types.');
     await page.keyboard.press('End');
     await page.evaluate(() => {
       const dt = new DataTransfer();
@@ -168,17 +168,20 @@ test.describe('editor keyboard & clipboard', () => {
 
   test('move blocks with Alt+Arrow', async ({ page, request }) => {
     const ed = await openEditor(page, id);
-    await ed.getByText('There are three major types.').click();
+    await clickInto(page, ed, 'There are three major types.');
     await page.keyboard.press('Alt+ArrowUp');
     await waitSaved(page);
-    expect(paragraphTexts((await savedContent(request, id)).content).slice(1)).toEqual(['Machine learning is a branch of AI.', 'There are three major types.', 'It allows computers to learn from data.']);
+    // Poll: under load "✓ Saved" can still be showing from before the move.
+    await expect
+      .poll(async () => paragraphTexts((await savedContent(request, id)).content).slice(1))
+      .toEqual(['Machine learning is a branch of AI.', 'There are three major types.', 'It allows computers to learn from data.']);
   });
 
   test('autosave debounces typing (no request per keystroke)', async ({ page }) => {
     const ed = await openEditor(page, id);
     let puts = 0;
     page.on('request', (r) => r.method() === 'PUT' && r.url().includes('/content') && puts++);
-    await ed.getByText('There are three major types.').click();
+    await clickInto(page, ed, 'There are three major types.');
     await page.keyboard.press('End');
     await page.keyboard.type(' A fairly long sentence typed quickly.', { delay: 20 });
     await expect(page.getByTestId('save-status')).toHaveText('✓ Saved', { timeout: 10000 });
@@ -188,7 +191,7 @@ test.describe('editor keyboard & clipboard', () => {
 
   test('large edits: paste several paragraphs of text', async ({ page, request }) => {
     const ed = await openEditor(page, id);
-    await ed.getByText('There are three major types.').click();
+    await clickInto(page, ed, 'There are three major types.');
     await page.keyboard.press('End');
     const html = Array.from({ length: 40 }, (_, i) => `<p>Pasted paragraph number ${i + 1} with some words.</p>`).join('');
     await page.evaluate((h) => {

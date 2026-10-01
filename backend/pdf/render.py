@@ -12,7 +12,17 @@ import math
 import pymupdf as fitz  # PyMuPDF
 from reportlab.pdfgen import canvas
 
-from backend.handwriting.styles import GRID_COLOR, INKS, MARGIN_COLOR, PAPER_BG, RULE_COLOR, STYLES
+from backend.handwriting.styles import (
+    GRID_COLOR,
+    INKS,
+    MARGIN_COLOR,
+    PAPER_BG,
+    RULE_COLOR,
+    SHEET_LINE_COLOR,
+    STYLES,
+    bounded_gauss,
+    seeded_rng,
+)
 from backend.layout import fonts
 from backend.layout.engine import MM, DisplayList
 
@@ -52,6 +62,56 @@ def _draw_paper(c: canvas.Canvas, dl: DisplayList) -> None:
         while x < dl.width:
             c.line(x, 0, x, dl.height)
             x += step
+    elif s.paper == "assignment":
+        # Loose assignment sheet: no ruling, a header line across the top and
+        # a margin line down the left.
+        c.setStrokeColorRGB(*SHEET_LINE_COLOR)
+        c.setLineWidth(0.55)
+        top = dl.header.rule_y if dl.header and dl.header.rule_y is not None else dl.height - 15 * MM
+        c.line(0, top, dl.width, top)
+        mx = x0 - 3 * MM
+        c.line(mx, 0, mx, top)
+
+
+def _hand_text(c: canvas.Canvas, dl: DisplayList, text: str, x: float, y: float, size: float, shade: float, invisible: bool, key: object, align_right: bool = False) -> None:
+    """A short handwritten string outside the text box (header, page number),
+    with the same kind of bounded per-letter jitter as body text."""
+    s = dl.settings
+    style = STYLES[s.style]
+    ink = INKS[s.ink]
+    rng = seeded_rng("furniture", s.seed, s.style, key, text)
+    chars = [(ch, fonts.font_for(ch, style.font)) for ch in text]
+    if align_right:
+        x -= sum(fonts.advance(ch, fn, size) for ch, fn in chars)
+    c.saveState()
+    t = c.beginText()
+    t.setTextRenderMode(3 if invisible else 0)
+    t.setFillColorRGB(*_mix(ink, shade))
+    k = math.tan(math.radians(style.slant_deg))
+    v = s.variation
+    for ch, fn in chars:
+        t.setFont(fn, size)
+        if invisible:
+            t.setTextTransform(1, 0, 0, 1, x, y)
+        else:
+            r = math.radians(bounded_gauss(rng, 1.0 * v))
+            cr, sr = math.cos(r), math.sin(r)
+            dy = bounded_gauss(rng, style.baseline_var * v * size)
+            t.setTextTransform(cr, sr, cr * k - sr, sr * k + cr, x, y + dy)
+        t.textOut(ch)
+        x += fonts.advance(ch, fn, size)
+    c.drawText(t)
+    c.restoreState()
+
+
+def _hand_rule(c: canvas.Canvas, x1: float, y1: float, x2: float, y2: float, rng) -> None:
+    """A pen line drawn by hand: slightly bowed and uneven, not ruler-straight."""
+    p = c.beginPath()
+    p.moveTo(x1, y1)
+    dx, dy = x2 - x1, y2 - y1
+    amp = min(1.4, 0.012 * abs(dx) + 0.3)
+    p.curveTo(x1 + dx / 3, y1 + dy / 3 + rng.uniform(-amp, amp), x1 + 2 * dx / 3, y1 + 2 * dy / 3 + rng.uniform(-amp, amp), x2, y2 + rng.uniform(-0.4, 0.4))
+    c.drawPath(p, stroke=1, fill=0)
 
 
 def render_pdf(dl: DisplayList, meta: dict | None = None, text_layer_only: bool = False) -> bytes:
@@ -129,6 +189,12 @@ def render_pdf(dl: DisplayList, meta: dict | None = None, text_layer_only: bool 
                 t.textOut(g.ch)
             c.drawText(t)
             c.restoreState()
+        band = dl.header
+        if band is not None:
+            for i, (text, hx, hy) in enumerate(band.lines):
+                _hand_text(c, dl, text, hx, hy, band.size, 0.95, text_layer_only, ("header", i, page.number))
+            if band.page_number_y is not None:
+                _hand_text(c, dl, str(page.number), dl.box[2], band.page_number_y, band.size, 0.95, text_layer_only, ("pageno", page.number), align_right=True)
         if text_layer_only:
             c.showPage()
             continue
@@ -140,9 +206,12 @@ def render_pdf(dl: DisplayList, meta: dict | None = None, text_layer_only: bool 
                 c.setStrokeColorRGB(*_mix(ink, 0.45))
             else:
                 c.setStrokeColorRGB(*ink)
-            c.line(d.x1, d.y1, d.x2, d.y2)
+            if d.kind == "heading_rule":
+                _hand_rule(c, d.x1, d.y1, d.x2, d.y2, seeded_rng("rule", s.seed, page.number, d.line_id))
+            else:
+                c.line(d.x1, d.y1, d.x2, d.y2)
         x0, y0, x1, y1 = dl.box
-        if s.page_numbers:
+        if s.page_numbers and s.page_number_position == "bottom":
             label = f"– {page.number} –"
             size = max(10.0, s.font_size * 0.75)
             c.setFillColorRGB(*_mix(ink, 0.8))

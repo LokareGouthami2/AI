@@ -60,9 +60,14 @@ content hash of the exact revision it came from.
     scanner (paper texture, lighting, slight tilt, soft ink, per-letter
     variation), with an invisible text layer so it stays searchable;
   - a clean digital look is also available;
-  - 6 styles, blue or black ink, ruled/blank/grid paper;
+  - 8 styles (including two student-ballpoint hands), blue or black ink,
+    ruled/blank/grid/assignment paper;
+  - **Assignment sheet** preset (one click): unruled paper with a header line
+    and margin line, your name and roll/ID number at the top of every page,
+    page number top-right, hand-drawn underlines under headings (opt-in), and
+    faint show-through of writing from the back of the sheet;
   - size, line spacing, paragraph spacing and margins;
-  - page numbers, variation amount and seed.
+  - page numbers (bottom or top-right), variation amount and seed.
 * **Quality gate:** overflow, ink overlap, empty pages, exact content
   coverage, blank lines and line breaks, orphan headings, readability and
   contrast, underline audit, and a post-render audit that reads the PDF back.
@@ -148,8 +153,10 @@ limitations: **[docs/evaluation.md](docs/evaluation.md)**.
 | ![Landing](screenshots/01-landing.png) | ![Analysis](screenshots/02-analysis.png) |
 | ![Ask your document](screenshots/04-ask-your-document.png) | ![Flashcards](screenshots/05-flashcards.png) |
 | ![Quiz](screenshots/06-quiz.png) | ![Handwriting settings](screenshots/07-handwriting-settings.png) |
+| ![Assignment sheet](screenshots/09-assignment-sheet.png) | |
 
-The screenshots are captured automatically by `frontend/e2e/study-and-pages.spec.js`.
+The screenshots are captured automatically by the Playwright tests
+(`frontend/e2e/study-and-pages.spec.js`, `assignment-sheet.spec.js`).
 
 **Demo video:** not recorded yet. For a live walkthrough, run the app and
 follow the acceptance flow below.

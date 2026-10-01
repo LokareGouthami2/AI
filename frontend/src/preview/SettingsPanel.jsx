@@ -14,11 +14,56 @@ export const DEFAULT_SETTINGS = {
   margin_left_mm: 28,
   margin_right_mm: 15,
   page_numbers: true,
+  page_number_position: 'bottom',
+  header_name: '',
+  header_id: '',
+  underline_headings: false,
+  show_through: false,
   watermark: false,
   output: 'scanned',
   variation: 1,
   seed: 0,
 };
+
+/**
+ * "Assignment sheet": loose unruled paper with a header line and margin line,
+ * name + ID top-left, page number top-right, hand-underlined headings and
+ * faint writing showing through from the back, like a real submitted
+ * assignment. Keeps the user's name/ID and everything not listed here.
+ */
+export const ASSIGNMENT_PRESET = {
+  paper: 'assignment',
+  style: 'ballpoint',
+  ink: 'blue',
+  output: 'scanned',
+  page_numbers: true,
+  page_number_position: 'top-right',
+  underline_headings: true,
+  show_through: true,
+  line_spacing: 1.8,
+  margin_left_mm: 22,
+};
+
+function YesNo({ label, value, onChange, testid }) {
+  return (
+    <label className="field">
+      <span>{label}</span>
+      <select className="select" value={value ? 'yes' : 'no'} onChange={(e) => onChange(e.target.value === 'yes')} data-testid={testid}>
+        <option value="no">Off</option>
+        <option value="yes">On</option>
+      </select>
+    </label>
+  );
+}
+
+function Text({ label, value, onChange, placeholder, testid }) {
+  return (
+    <label className="field">
+      <span>{label}</span>
+      <input className="input" type="text" maxLength={80} value={value ?? ''} placeholder={placeholder} onChange={(e) => onChange(e.target.value)} data-testid={testid} />
+    </label>
+  );
+}
 
 function Num({ label, value, onChange, min, max, step = 1 }) {
   return (
@@ -35,8 +80,19 @@ export default function SettingsPanel({ settings, onChange, compact = false }) {
     api.styles().then(setStyles).catch(() => setStyles([]));
   }, []);
   const set = (k) => (v) => onChange({ ...settings, [k]: v });
+  const isAssignment = settings.paper === 'assignment' && settings.underline_headings && settings.page_number_position === 'top-right';
   return (
-    <div className={compact ? 'grid-3' : 'grid-3'} data-testid="render-settings">
+    <div className="stack" data-testid="render-settings">
+    <div className="row">
+      <button type="button" className={`btn ${isAssignment ? 'btn-primary' : ''}`} onClick={() => onChange({ ...settings, ...ASSIGNMENT_PRESET })} data-testid="preset-assignment">
+        📝 Assignment sheet
+      </button>
+      <button type="button" className="btn" onClick={() => onChange({ ...DEFAULT_SETTINGS, header_name: settings.header_name, header_id: settings.header_id })} data-testid="preset-notes">
+        📒 Notebook notes
+      </button>
+      <span className="small muted">Presets: one click sets the paper, style and page layout; adjust anything after.</span>
+    </div>
+    <div className="grid-3">
       <label className="field">
         <span>Handwriting style</span>
         <select className="select" value={settings.style} onChange={(e) => set('style')(e.target.value)}>
@@ -65,6 +121,7 @@ export default function SettingsPanel({ settings, onChange, compact = false }) {
           <option value="ruled">Ruled</option>
           <option value="blank">Blank</option>
           <option value="grid">Grid</option>
+          <option value="assignment">Assignment sheet (unruled)</option>
         </select>
       </label>
       <label className="field">
@@ -87,13 +144,23 @@ export default function SettingsPanel({ settings, onChange, compact = false }) {
           <Num label="Variation seed" value={settings.seed} min={0} max={1000000} onChange={set('seed')} />
         </>
       )}
+      <Text label="Header: name (top-left of every page)" value={settings.header_name} onChange={set('header_name')} placeholder="e.g. your name" testid="header-name" />
+      <Text label="Header: roll / ID number" value={settings.header_id} onChange={set('header_id')} placeholder="e.g. roll number" testid="header-id" />
       <label className="field">
         <span>Page numbers</span>
-        <select className="select" value={settings.page_numbers ? 'yes' : 'no'} onChange={(e) => set('page_numbers')(e.target.value === 'yes')}>
-          <option value="yes">Show</option>
-          <option value="no">Hide</option>
+        <select
+          className="select"
+          value={settings.page_numbers ? settings.page_number_position || 'bottom' : 'none'}
+          onChange={(e) => onChange({ ...settings, page_numbers: e.target.value !== 'none', page_number_position: e.target.value === 'none' ? settings.page_number_position : e.target.value })}
+          data-testid="page-numbers"
+        >
+          <option value="bottom">Bottom centre</option>
+          <option value="top-right">Top right</option>
+          <option value="none">Hide</option>
         </select>
       </label>
+      <YesNo label="Underline headings (hand-drawn)" value={settings.underline_headings} onChange={set('underline_headings')} testid="underline-headings" />
+      <YesNo label="Show-through from back of page (scanned look)" value={settings.show_through} onChange={set('show_through')} testid="show-through" />
       <label className="field">
         <span>“Generated with WriteAI” footer</span>
         <select className="select" value={settings.watermark ? 'yes' : 'no'} onChange={(e) => set('watermark')(e.target.value === 'yes')}>
@@ -101,6 +168,7 @@ export default function SettingsPanel({ settings, onChange, compact = false }) {
           <option value="yes">Show</option>
         </select>
       </label>
+    </div>
     </div>
   );
 }

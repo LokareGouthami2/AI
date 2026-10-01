@@ -43,8 +43,31 @@ export async function openEditor(page, id) {
   return editor;
 }
 
+/**
+ * Click into a piece of editor text and make sure the cursor really landed in
+ * that block. Right after the editor mounts, its content can still be loading,
+ * and a click then would leave the cursor at the start of the document.
+ */
+export async function clickInto(page, ed, text) {
+  await expect(async () => {
+    await ed.getByText(text).first().click();
+    const block = await page.evaluate(() => {
+      const n = window.getSelection()?.anchorNode;
+      const el = n?.nodeType === 3 ? n.parentElement : n;
+      return el?.closest('p, h1, h2, h3, li, blockquote')?.textContent ?? '';
+    });
+    expect(block).toContain(text);
+  }).toPass({ timeout: 10_000 });
+}
+
 export async function waitSaved(page) {
+  // Wait for the save request itself: right after typing, the status label
+  // can still show the previous "✓ Saved" for a render.
+  const put = page
+    .waitForResponse((r) => r.request().method() === 'PUT' && new URL(r.url()).pathname.endsWith('/content'), { timeout: 5_000 })
+    .catch(() => null); // nothing pending (autosave already saved it)
   await page.getByTestId('save-now').click();
+  await put;
   await expect(page.getByTestId('save-status')).toHaveText('✓ Saved');
 }
 

@@ -26,7 +26,9 @@
 * Pydantic validation on every request body. WDM documents are closed schemas
   (`extra="forbid"`) with limits: 5,000 blocks, nesting depth 4, 20,000
   characters per text node, 5 MB per document.
-* Render settings are range-checked (font size, margins, spacing …).
+* Render settings are range-checked (font size, margins, spacing …). Header
+  text fields are limited to 80 characters and normalised to one printable
+  line.
 * One error envelope; unhandled errors return a generic 500 with no stack
   trace.
 * Security headers: `X-Content-Type-Options`, `X-Frame-Options: DENY`,

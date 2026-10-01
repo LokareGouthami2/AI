@@ -15,6 +15,8 @@ perfectly legible, and is reproducible.
 | Playful | Indie Flower (OFL) | Loose, bouncy |
 | Quick notes | Caveat 400/700 (OFL) | Fast note-taking hand |
 | Light | Shadows Into Light (OFL) | Thin, airy |
+| Student ballpoint | Nothing You Could Do (OFL) | Fast, slanted ballpoint print |
+| Student print | Annie Use Your Telescope (OFL) | Thin upright print (+3° slant) |
 
 The fonts are the Latin subsets from the `@fontsource/*` npm packages,
 converted WOFF → TTF with fontTools; licences are in `backend/assets/fonts/`.
@@ -79,6 +81,34 @@ exactly. The underline audit runs on the vector render before scanning.
 
 The "Generated with WriteAI" footer is **off by default** and can be switched
 on in the settings.
+
+## Assignment sheet
+
+Modelled on a real handwritten university assignment: loose unruled paper,
+written in blue ballpoint, then scanned. The **Assignment sheet** preset in the
+UI sets these options (all of them can also be used on their own):
+
+| Setting | Effect |
+|---|---|
+| `paper: "assignment"` | No ruling; a thin header line across the top and a margin line down the left |
+| `header_name`, `header_id` | Written top-left on every page, one under the other, in the same hand (one printable line each, max 80 characters) |
+| `page_number_position: "top-right"` | Page number written at the top right instead of "– n –" at the bottom |
+| `underline_headings` | A hand-drawn, slightly bowed pen line under every heading line |
+| `show_through` | Scanned look: faint, blurred, mirrored writing from the back of the sheet |
+
+* **Header band** (`layout/engine.py: header_band`): computed by the layout
+  engine, not the renderer, so the text box always starts below it. The
+  header text never enters the body text, the content audit or the token
+  coverage check.
+* **Heading underlines stay opt-in.** The editor never adds underline marks
+  automatically, and this doesn't change that: heading rules are a separate
+  decoration kind (`heading_rule`), drawn only when the user enables the
+  option. The checker rejects any heading rule when the option is off, or
+  under a line that isn't a heading.
+* **Show-through** uses the ink of the next page (else the previous one;
+  a one-page document uses its own writing shifted down) as a low-resolution
+  mask, mirrored, blurred and multiplied in at about 5 % strength before the
+  scanner effects.
 
 ## PDF output
 

@@ -121,7 +121,7 @@ def test_long_word_is_force_broken_without_overflow():
 
 
 @pytest.mark.parametrize("style", list(STYLES))
-@pytest.mark.parametrize("paper", ["ruled", "blank", "grid"])
+@pytest.mark.parametrize("paper", ["ruled", "blank", "grid", "assignment"])
 def test_all_styles_pass_quality_and_pdf_audit(style, paper):
     d = long_doc(1)
     s = RenderSettings(style=style, paper=paper, ink="black" if paper == "grid" else "blue")
@@ -304,3 +304,77 @@ def test_clean_output_stays_vector_and_watermark_is_off_by_default():
     assert RenderSettings().watermark is False
     with pymupdf.open(stream=pdf) as doc:
         assert "WriteAI" not in doc[0].get_text()
+
+
+# ------------------------------------------------------- assignment sheet
+
+
+ASSIGNMENT = dict(
+    paper="assignment",
+    style="ballpoint",
+    header_name="A. Student",
+    header_id="ROLL-0042",
+    page_number_position="top-right",
+    underline_headings=True,
+)
+
+
+def test_assignment_sheet_header_clears_text_and_audits_pass():
+    d = long_doc(2)
+    s = RenderSettings(**ASSIGNMENT)
+    dl = layout(d, s, "h")
+    band = dl.header
+    assert [t for t, _, _ in band.lines] == ["A. Student", "ROLL-0042"]
+    # The body never reaches the header rule; every line's ink is below it.
+    assert dl.box[3] < band.rule_y
+    assert all(ln.ink_top < band.rule_y for p in dl.pages for ln in p.lines)
+    r = check_layout(d, dl)
+    assert r.passed, r.to_dict()["errors"]
+    pdf = render_pdf(dl, {"content_hash": "h"})
+    a = audit_pdf(d, dl, pdf, {"content_hash": "h"})
+    assert a.passed, a.to_dict()["errors"]  # header text is not counted as body text
+    with pymupdf.open(stream=pdf) as doc:
+        H = doc[1].rect.height
+        top = "".join(doc[1].get_text(clip=pymupdf.Rect(0, 0, doc[1].rect.width, H - band.rule_y)).split())
+    assert top == "A.StudentROLL-00422"  # name, ID, then the page number
+
+
+def test_heading_rules_are_opt_in_and_only_under_headings():
+    d = long_doc(1)
+    off = layout(d, RenderSettings(paper="assignment"), "h")
+    assert not [x for p in off.pages for x in p.decorations if x.kind == "heading_rule"]
+    on = layout(d, RenderSettings(paper="assignment", underline_headings=True), "h")
+    rules = [(p, x) for p in on.pages for x in p.decorations if x.kind == "heading_rule"]
+    heading_lines = [ln for p in on.pages for ln in p.lines if ln.kind == "heading"]
+    assert len(rules) == len(heading_lines) > 0
+    r = check_layout(d, on)
+    assert r.passed and r.metrics["heading_rules"] == len(rules)
+    # Underline *marks* are untouched: heading rules are not text underlines.
+    assert on.stats["underlined_chars"] == ""
+    # The checker rejects heading rules the user did not ask for.
+    on.settings = RenderSettings(paper="assignment")
+    assert "UNWANTED_UNDERLINE" in [e.code for e in check_layout(d, on).errors]
+
+
+def test_header_fields_are_single_printable_lines():
+    s = RenderSettings(header_name="  Ann\n\tLee\x00 ", header_id="x" * 80)
+    assert s.header_name == "Ann Lee"
+    with pytest.raises(ValueError):
+        RenderSettings(header_id="x" * 81)
+
+
+def test_show_through_darkens_paper_but_keeps_text_layer():
+    d = long_doc(1)
+    s = RenderSettings(**ASSIGNMENT, output="scanned")
+    dl, (plain, _) = _scan(d, s)
+    _, (ghost, _) = _scan(d, s.model_copy(update={"show_through": True}))
+
+    def mean(pdf):
+        with pymupdf.open(stream=pdf) as doc:
+            px = doc[0].get_pixmap(dpi=40)
+            return sum(px.samples) / len(px.samples)
+
+    assert mean(ghost) < mean(plain)  # faint reverse-side writing adds a little ink
+    assert mean(plain) - mean(ghost) < 4  # ...but only faintly
+    a = audit_pdf(d, dl, ghost, {"content_hash": "h"}, check_strokes=False)
+    assert a.passed and a.metrics["text_similarity"] == 1.0
