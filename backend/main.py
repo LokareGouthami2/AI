@@ -10,7 +10,7 @@ import logging
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
 
 from backend.api.routes import router
 from backend.config import get_settings
@@ -18,6 +18,13 @@ from backend.database.session import init_engine
 from backend.services.errors import AppError
 
 log = logging.getLogger("writeai")
+
+# The web UI needs scripts, styles and Google Fonts; the API needs nothing.
+WEB_CSP = (
+    "default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+    "font-src 'self' https://fonts.gstatic.com; script-src 'self'; connect-src 'self'; frame-ancestors 'none'"
+)
+API_CSP = "default-src 'none'; img-src 'self'; frame-ancestors 'none'"
 
 
 def create_app() -> FastAPI:
@@ -45,8 +52,9 @@ def create_app() -> FastAPI:
         response.headers.setdefault("X-Content-Type-Options", "nosniff")
         response.headers.setdefault("X-Frame-Options", "DENY")
         response.headers.setdefault("Referrer-Policy", "no-referrer")
-        if not request.url.path.startswith("/api/docs"):
-            response.headers.setdefault("Content-Security-Policy", "default-src 'none'; img-src 'self'; frame-ancestors 'none'")
+        path = request.url.path
+        if not path.startswith("/api/docs"):
+            response.headers.setdefault("Content-Security-Policy", API_CSP if path.startswith("/api/") else WEB_CSP)
         return response
 
     @app.exception_handler(AppError)
@@ -78,7 +86,27 @@ def create_app() -> FastAPI:
         }
 
     app.include_router(router)
+    if settings.static_dir is not None:
+        _serve_web_ui(app, settings.static_dir.resolve())
     return app
+
+
+def _serve_web_ui(app: FastAPI, root) -> None:
+    """Serve the built single-page app: real files as-is, every other
+    non-API path gets index.html (client-side routing)."""
+    index = root / "index.html"
+    if not index.is_file():
+        raise RuntimeError(f"WRITEAI_STATIC_DIR has no index.html: {root}")
+
+    @app.get("/{path:path}", include_in_schema=False)
+    def web_ui(path: str):
+        if path.startswith("api/"):
+            return JSONResponse(status_code=404, content={"error": {"code": "NOT_FOUND", "message": "Not found.", "details": {}}})
+        f = (root / path).resolve()
+        if path and f.is_file() and f.is_relative_to(root):  # never outside the build folder
+            cache = "public, max-age=31536000, immutable" if path.startswith("assets/") else "no-cache"
+            return FileResponse(f, headers={"Cache-Control": cache})
+        return FileResponse(index, headers={"Cache-Control": "no-cache"})
 
 
 app = create_app()

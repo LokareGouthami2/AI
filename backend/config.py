@@ -53,6 +53,9 @@ class Settings(BaseSettings):
     cors_origins: list[str] = ["http://localhost:5173", "http://127.0.0.1:5173"]
     api_token: SecretStr | None = None  # optional shared token for deployed demos
     rate_limit_per_minute: int = 60
+    # Built web UI (frontend/dist). When set, the API also serves the website,
+    # so one container is a complete deployment.
+    static_dir: Path | None = None
 
     @field_validator("api_token", "anthropic_api_key", mode="before")
     @classmethod

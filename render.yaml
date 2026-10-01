@@ -1,0 +1,18 @@
+# Render Blueprint: one free web service running the single-container image.
+# Deploy: https://render.com/deploy?repo=https://github.com/LokareGouthami2/AI
+services:
+  - type: web
+    name: writeai
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    branch: claude/writeai-2-0-platform-3ch69p
+    plan: free
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: WRITEAI_ENV
+        value: production
+      # Optional: set your key in the Render dashboard for AI-written notes;
+      # without it the built-in offline engine is used.
+      - key: ANTHROPIC_API_KEY
+        sync: false

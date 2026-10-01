@@ -231,3 +231,35 @@ def test_empty_secrets_in_env_mean_unset(monkeypatch):
     monkeypatch.setenv("ANTHROPIC_API_KEY", "  ")
     s = Settings()
     assert s.api_token is None and s.anthropic_api_key is None
+
+
+def test_single_container_serves_web_ui(tmp_path, monkeypatch):
+    """WRITEAI_STATIC_DIR: the API also serves the built SPA (one-container deploy)."""
+    from fastapi.testclient import TestClient
+
+    from backend.config import get_settings
+    from backend.main import create_app
+
+    (tmp_path / "assets").mkdir()
+    (tmp_path / "index.html").write_text("<!doctype html><div id=root></div>")
+    (tmp_path / "assets" / "app.js").write_text("console.log(1)")
+    (tmp_path.parent / "secret.txt").write_text("nope")
+    monkeypatch.setenv("WRITEAI_STATIC_DIR", str(tmp_path))
+    get_settings.cache_clear()
+    try:
+        with TestClient(create_app()) as c:
+            home = c.get("/")
+            assert home.status_code == 200 and "id=root" in home.text
+            assert "script-src 'self'" in home.headers["content-security-policy"]
+            # Client-side routes fall back to index.html.
+            assert "id=root" in c.get("/documents/abc/editor").text
+            js = c.get("/assets/app.js")
+            assert js.text == "console.log(1)" and "immutable" in js.headers["cache-control"]
+            # No escaping the build folder; API paths stay JSON.
+            assert "nope" not in c.get("/..%2Fsecret.txt").text
+            assert c.get("/api/health").json()["ok"] is True
+            assert c.get("/api/nope").status_code == 404
+            assert c.get("/api/health").headers["content-security-policy"].startswith("default-src 'none'")
+    finally:
+        monkeypatch.delenv("WRITEAI_STATIC_DIR")
+        get_settings.cache_clear()
