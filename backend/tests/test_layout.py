@@ -442,3 +442,23 @@ def test_unruled_paper_avoids_collisions_by_small_steps():
     # page compact: never more pages than ruled paper.
     assert len(sheet.pages) <= len(ruled.pages)
     assert check_layout(d, sheet).passed
+
+
+def test_show_through_levels_and_pen_shadow():
+    d = long_doc(1)
+    base = RenderSettings(**PHOTO_ASSIGNMENT)
+
+    def mean(s):
+        _, (pdf, _) = _scan(d, s)
+        with pymupdf.open(stream=pdf) as doc:
+            px = doc[0].get_pixmap(dpi=40)
+            return sum(px.samples) / len(px.samples), pdf
+
+    off, _ = mean(base.model_copy(update={"show_through": False}))
+    levels = [mean(base.model_copy(update={"show_through_level": lv}))[0] for lv in ("light", "medium", "strong")]
+    assert off > levels[0] > levels[1] > levels[2]  # each level shows more of the back
+    shadow, pdf = mean(base.model_copy(update={"pen_shadow": True}))
+    assert shadow < levels[1]  # stroke shadows add a little grey
+    dl = layout(d, base.model_copy(update={"pen_shadow": True}), "h")
+    a = audit_pdf(d, dl, pdf, {"content_hash": "h"}, check_strokes=False)
+    assert a.passed and a.metrics["text_similarity"] == 1.0  # text layer untouched

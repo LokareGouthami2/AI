@@ -15,16 +15,17 @@ test('assignment sheet preset renders header, top-right page numbers and heading
   await page.getByTestId('preset-assignment').click();
   await page.getByTestId('header-name').fill('Test Student');
   await page.getByTestId('header-id').fill('ROLL-123');
-  await expect(page.getByLabel('Paper')).toHaveValue('assignment');
+  await expect(page.getByTestId('paper')).toHaveValue('assignment');
   await expect(page.getByTestId('page-numbers')).toHaveValue('top-right');
   await expect(page.getByTestId('underline-headings')).toHaveValue('yes');
+  await expect(page.getByTestId('show-through')).toHaveValue('medium');
 
   // Settings are saved per document (the preset + typed header).
   await expect
     .poll(async () => (await (await request.get(`/api/documents/${id}/render-settings`)).json()).header_id, { timeout: 10_000 })
     .toBe('ROLL-123');
   const saved = await (await request.get(`/api/documents/${id}/render-settings`)).json();
-  expect(saved).toMatchObject({ paper: 'assignment', style: 'student', ink: 'ballpoint', output: 'photo', header_name: 'Test Student', underline_headings: true, plain_headings: true, show_through: true });
+  expect(saved).toMatchObject({ paper: 'assignment', style: 'student', ink: 'ballpoint', output: 'photo', header_name: 'Test Student', underline_headings: true, plain_headings: true, show_through: true, show_through_level: 'medium', pen_shadow: true });
 
   await page.getByTestId('update-preview').click();
   await expect(page.getByTestId('preview-page').first()).toBeVisible({ timeout: 60_000 });
@@ -37,7 +38,7 @@ test('assignment sheet preset renders header, top-right page numbers and heading
 
   // Notebook preset puts the defaults back but keeps the typed name/ID.
   await page.getByTestId('preset-notes').click();
-  await expect(page.getByLabel('Paper')).toHaveValue('ruled');
+  await expect(page.getByTestId('paper')).toHaveValue('ruled');
   await expect(page.getByTestId('underline-headings')).toHaveValue('no');
   await expect(page.getByTestId('header-name')).toHaveValue('Test Student');
 });

@@ -20,6 +20,8 @@ export const DEFAULT_SETTINGS = {
   underline_headings: false,
   plain_headings: false,
   show_through: false,
+  show_through_level: 'medium',
+  pen_shadow: false,
   watermark: false,
   output: 'scanned',
   variation: 1,
@@ -42,6 +44,8 @@ export const ASSIGNMENT_PRESET = {
   underline_headings: true,
   plain_headings: true,
   show_through: true,
+  show_through_level: 'medium',
+  pen_shadow: true,
   font_size: 17,
   line_spacing: 1.5,
   paragraph_spacing: 0,
@@ -125,7 +129,7 @@ export default function SettingsPanel({ settings, onChange, compact = false }) {
       </label>
       <label className="field">
         <span>Paper</span>
-        <select className="select" value={settings.paper} onChange={(e) => set('paper')(e.target.value)}>
+        <select className="select" value={settings.paper} onChange={(e) => set('paper')(e.target.value)} data-testid="paper">
           <option value="ruled">Ruled</option>
           <option value="blank">Blank</option>
           <option value="grid">Grid</option>
@@ -169,7 +173,21 @@ export default function SettingsPanel({ settings, onChange, compact = false }) {
       </label>
       <YesNo label="Underline headings (hand-drawn)" value={settings.underline_headings} onChange={set('underline_headings')} testid="underline-headings" />
       <YesNo label="Headings written like normal text (not bold/large)" value={settings.plain_headings} onChange={set('plain_headings')} testid="plain-headings" />
-      <YesNo label="Show-through from back of page (scan/photo look)" value={settings.show_through} onChange={set('show_through')} testid="show-through" />
+      <label className="field">
+        <span>Writing showing through from the back (scan/photo look)</span>
+        <select
+          className="select"
+          value={settings.show_through ? settings.show_through_level || 'medium' : 'off'}
+          onChange={(e) => onChange({ ...settings, show_through: e.target.value !== 'off', show_through_level: e.target.value === 'off' ? settings.show_through_level || 'medium' : e.target.value })}
+          data-testid="show-through"
+        >
+          <option value="off">Off</option>
+          <option value="light">Light</option>
+          <option value="medium">Medium (like real paper)</option>
+          <option value="strong">Strong (thin paper)</option>
+        </select>
+      </label>
+      <YesNo label="Pen-pressure shadow on strokes (scan/photo look)" value={settings.pen_shadow} onChange={set('pen_shadow')} testid="pen-shadow" />
       <label className="field">
         <span>“Generated with WriteAI” footer</span>
         <select className="select" value={settings.watermark ? 'yes' : 'no'} onChange={(e) => set('watermark')(e.target.value === 'yes')}>

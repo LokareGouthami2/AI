@@ -46,7 +46,7 @@ def back_of_page(masks: list[np.ndarray], i: int) -> np.ndarray:
         src = masks[i + 1] if i + 1 < len(masks) else masks[i - 1]
     else:
         src = np.roll(masks[i], masks[i].shape[0] // 37, axis=0)
-    return src[:, ::-1]
+    return np.ascontiguousarray(src[:, ::-1])
 
 
 def _smooth_noise(rng, h: int, w: int, sigma: float, amp: float) -> np.ndarray:
@@ -76,7 +76,26 @@ def hand_warp(rgb: np.ndarray, rng, dpi: int) -> np.ndarray:
     return cv2.remap(rgb, m1, m2, interpolation=cv2.INTER_LINEAR, borderMode=cv2.BORDER_REPLICATE)
 
 
-def scan_effect(rgb: np.ndarray, seed: int, dpi: int, back: np.ndarray | None = None, look: str = "scanned", thin_px: int = 0) -> np.ndarray:
+# Show-through levels: (darkening strength, blur in px at 150 DPI). Medium
+# matches a photographed assignment on ordinary 70 gsm paper.
+THROUGH_LEVELS = {"light": (1.0, 2.4), "medium": (2.6, 1.5), "strong": (4.0, 1.1)}
+
+
+def pen_groove_shadow(img: np.ndarray, ink: np.ndarray, k: float) -> None:
+    """A ballpoint presses a groove into the paper; light from the side puts
+    a faint shadow along one edge of every stroke. Darkens the paper just
+    below-right of the ink (in place)."""
+    h, w = ink.shape
+    d = max(1.0, 1.1 * k)
+    m = np.float32([[1, 0, d], [0, 1, d]])
+    shadow = cv2.warpAffine(ink, m, (w, h), flags=cv2.INTER_LINEAR, borderValue=0)
+    cv2.GaussianBlur(shadow, (0, 0), 0.9 * k, dst=shadow)
+    shadow *= 1.0 - ink  # only on paper, never over the ink itself
+    for c, tone in enumerate((0.14, 0.14, 0.12)):  # grey, a touch warm
+        img[..., c] *= 1.0 - tone * shadow
+
+
+def scan_effect(rgb: np.ndarray, seed: int, dpi: int, back: np.ndarray | None = None, look: str = "scanned", thin_px: int = 0, through: str = "medium", pen_shadow: bool = False) -> np.ndarray:
     """Apply scanner-like degradation to an RGB uint8 page image. ``back`` is
     an optional ink mask of the reverse side (already mirrored).
 
@@ -105,14 +124,21 @@ def scan_effect(rgb: np.ndarray, seed: int, dpi: int, back: np.ndarray | None = 
     img += 1.0
     del flow
 
+    if pen_shadow:
+        pen_groove_shadow(img, ink_mask(rgb), k)
+
     # 0. Show-through: the reverse side's writing, diffused by the paper.
     if back is not None:
         ghost = back.astype(np.float32)
+        if back.dtype == np.uint8:
+            ghost *= 1.0 / 255.0
         if ghost.shape != (h, w):
             ghost = cv2.resize(ghost, (w, h), interpolation=cv2.INTER_LINEAR)
-        cv2.GaussianBlur(ghost, (0, 0), sigmaX=(3.2 if photo else 2.4) * k, dst=ghost)
+        strength, blur = THROUGH_LEVELS.get(through, THROUGH_LEVELS["medium"])
+        if photo:
+            strength *= 1.15  # thin paper under a phone's light
+        cv2.GaussianBlur(ghost, (0, 0), sigmaX=blur * k, dst=ghost)
         plane = np.empty((h, w), np.float32)
-        strength = 1.4 if photo else 1.0  # thin paper under a phone's light
         for c, tone in enumerate((0.055, 0.05, 0.035)):  # ink seen through paper: grey-blue
             np.multiply(ghost, -tone * strength, out=plane)
             plane += 1.0
@@ -191,16 +217,18 @@ def _pixels(page, dpi: int) -> np.ndarray:
     return np.frombuffer(pix.samples, dtype=np.uint8).reshape(pix.height, pix.width, pix.n)[..., :3]
 
 
-def scanned_pdf(visible_pdf: bytes, text_layer_pdf: bytes, seed_key: str, dpi: int = FINAL_DPI, jpeg_quality: int = 84, show_through: bool = False, look: str = "scanned", thin_px: int = 0) -> bytes:
+def scanned_pdf(visible_pdf: bytes, text_layer_pdf: bytes, seed_key: str, dpi: int = FINAL_DPI, jpeg_quality: int = 84, show_through: bool = False, look: str = "scanned", thin_px: int = 0, through: str = "medium", pen_shadow: bool = False) -> bytes:
     """Build the scanned-look PDF: one JPEG per page + invisible text layer."""
     out = fitz.open()
     with fitz.open(stream=visible_pdf, filetype="pdf") as src, fitz.open(stream=text_layer_pdf, filetype="pdf") as layer:
         # Reverse-side ink is blurred anyway: low-resolution masks keep memory
         # small for long documents (resized up in scan_effect).
-        masks = [ink_mask(_pixels(page, max(36, dpi // 4))) for page in src] if show_through else []
+        # Half resolution, stored as uint8: legible reverse-side writing at
+        # ~1 MB per page.
+        masks = [(ink_mask(_pixels(page, max(48, dpi // 2))) * 255).astype(np.uint8) for page in src] if show_through else []
         for i, page in enumerate(src):
             rgb = _pixels(page, dpi)
-            scanned = scan_effect(rgb, _seed(seed_key, i), dpi, back_of_page(masks, i) if show_through else None, look, thin_px)
+            scanned = scan_effect(rgb, _seed(seed_key, i), dpi, back_of_page(masks, i) if show_through else None, look, thin_px, through, pen_shadow)
             ok, jpg = cv2.imencode(".jpg", cv2.cvtColor(scanned, cv2.COLOR_RGB2BGR), [cv2.IMWRITE_JPEG_QUALITY, jpeg_quality])
             if not ok:  # pragma: no cover
                 raise RuntimeError("JPEG encoding failed")

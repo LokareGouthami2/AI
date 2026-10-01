@@ -68,7 +68,8 @@ content hash of the exact revision it came from.
     line; your name and roll/ID number on every page; page number top-right;
     plain, hand-underlined headings; every letter shaped slightly
     differently, lines that rise and a margin that drifts; uneven ballpoint
-    ink and writing showing through from the back of the sheet;
+    ink, pen-pressure shadows along the strokes, and writing showing through
+    from the back of the sheet (light / medium / strong);
   - size, line spacing, paragraph spacing and margins;
   - page numbers (bottom or top-right), variation amount and seed.
 * **Quality gate:** overflow, ink overlap, empty pages, exact content

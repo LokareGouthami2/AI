@@ -57,7 +57,7 @@ def build_pdf(dl, settings: RenderSettings, meta: dict, dpi: int) -> tuple[bytes
         return visible, visible
     layer = render_pdf(dl, meta, text_layer_only=True)
     seed_key = f"{meta.get('content_hash', '')}:{settings.seed}"
-    return scanned_pdf(visible, layer, seed_key, dpi=dpi, show_through=settings.show_through, look=settings.output, thin_px=STYLES[settings.style].thin_px), visible
+    return scanned_pdf(visible, layer, seed_key, dpi=dpi, show_through=settings.show_through, look=settings.output, thin_px=STYLES[settings.style].thin_px, through=settings.show_through_level, pen_shadow=settings.pen_shadow), visible
 
 
 def _meta(head, title: str, s_hash: str) -> dict:

@@ -112,6 +112,22 @@ scan: cool white paper under room light, a stronger light fall-off, a soft
 shadow where the sheet curves towards the binding, slightly more tilt, and
 stronger show-through.
 
+## Shadows: show-through and pen grooves
+
+* **Show-through** (`show_through`, `show_through_level`): the reverse side
+  of each sheet is another page's writing (the next page, else the previous
+  one), mirrored left↔right, blurred by the paper and multiplied in as
+  grey-blue. Levels: *light* (faint, very soft), *medium* (as on ordinary
+  70 gsm paper in a photo; the preset's default) and *strong* (thin paper).
+  The reverse-side masks are kept at half resolution as uint8 (~1 MB a page).
+* **Pen-groove shadow** (`pen_shadow`): a ballpoint presses a groove into the
+  paper, and side light puts a faint shadow along one edge of each stroke.
+  The ink mask is shifted ~1 px down-right, blurred and used to darken only
+  the paper next to the strokes.
+
+Neither touches the invisible text layer, so search and the PDF audit read
+the exact text (tested).
+
 ## Line grid on unruled paper
 
 On ruled and grid paper a line must sit on a printed rule, so the slot grid

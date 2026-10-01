@@ -41,6 +41,10 @@ class RenderSettings(BaseModel):
     plain_headings: bool = False
     # Scanned look only: faint mirrored writing from the back of the sheet.
     show_through: bool = False
+    show_through_level: Literal["light", "medium", "strong"] = "medium"
+    # Scan/photo looks: faint shadow along each pen stroke (the groove a
+    # ballpoint presses into paper, lit from the side).
+    pen_shadow: bool = False
     watermark: bool = False  # optional small "Generated with WriteAI" footer
     # scanned: flatbed/scan-app look; photo: a phone photo of the sheet (cool
     # white paper, uneven light); clean: the vector PDF.
