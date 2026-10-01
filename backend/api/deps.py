@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import hmac
 import threading
 import time
@@ -12,15 +13,34 @@ from fastapi import Request
 from backend.config import get_settings
 from backend.services.errors import AppError
 
+SESSION_COOKIE = "writeai_session"
 
-def require_token(request: Request) -> None:
-    """If WRITEAI_API_TOKEN is set, every /api request must carry it."""
+
+def session_value(token: str) -> str:
+    """Cookie value proving the password was entered: an HMAC of the token,
+    so the password itself is never stored in the browser."""
+    return hmac.new(token.encode(), b"writeai-session-v1", hashlib.sha256).hexdigest()
+
+
+def token_ok(request: Request) -> bool:
     token = get_settings().api_token
     if token is None:
-        return
+        return True
+    secret = token.get_secret_value()
     supplied = request.headers.get("x-api-token") or request.headers.get("authorization", "").removeprefix("Bearer ").strip()
-    if not supplied or not hmac.compare_digest(supplied, token.get_secret_value()):
-        raise AppError(401, "UNAUTHORIZED", "A valid API token is required.")
+    if supplied and hmac.compare_digest(supplied, secret):
+        return True
+    # The web UI logs in once and then uses an HttpOnly cookie, which also
+    # covers <img> previews and download links (they can't send headers).
+    cookie = request.cookies.get(SESSION_COOKIE, "")
+    return bool(cookie) and hmac.compare_digest(cookie, session_value(secret))
+
+
+def require_token(request: Request) -> None:
+    """If WRITEAI_API_TOKEN is set, every /api request must carry it (header
+    or login cookie)."""
+    if not token_ok(request):
+        raise AppError(401, "UNAUTHORIZED", "Please enter the site password.")
 
 
 class RateLimiter:

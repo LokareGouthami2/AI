@@ -1,5 +1,5 @@
 # Render Blueprint: one free web service running the single-container image.
-# Deploy: https://render.com/deploy?repo=https://github.com/LokareGouthami2/AI
+# Dashboard → New → Blueprint → pick this repository and this branch.
 services:
   - type: web
     name: writeai
@@ -12,7 +12,11 @@ services:
     envVars:
       - key: WRITEAI_ENV
         value: production
-      # Optional: set your key in the Render dashboard for AI-written notes;
-      # without it the built-in offline engine is used.
+      # Site password: Render asks for it when you create the Blueprint.
+      # Anyone without it sees only a login page. Leave empty = public site.
+      - key: WRITEAI_API_TOKEN
+        sync: false
+      # Optional: AI-written notes. Without a key the built-in offline engine
+      # is used.
       - key: ANTHROPIC_API_KEY
         sync: false

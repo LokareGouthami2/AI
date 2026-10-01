@@ -75,9 +75,14 @@ offline extractive answerer.
 
 | Recall@1 | Recall@5 | MRR | Answer contains evidence | Unanswerable refused |
 |---|---|---|---|---|
-| 0.895 | 1.000 | 0.947 | 0.737 | 5 / 5 |
+| 0.895 | 1.000 | 0.947 | 0.947 | 5 / 5 |
 
 Reproduce: `python -m backend.rag.evaluate`
+
+Sentence splitting uses spaCy's `senter` component (switched from the
+dependency parser to save ~80 MB of memory). Retrieval scores were
+unchanged; "answer contains evidence" rose from 0.737 to 0.947 because the
+chunker's sentence boundaries improved.
 
 ## Handwriting quality gate
 

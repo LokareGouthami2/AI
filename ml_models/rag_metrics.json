@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-30T15:40:11.102212+00:00",
+  "generated_at": "2026-10-01T07:24:49.200419+00:00",
   "embedder": "hashing-v1",
   "answer_engine": "offline extractive (LLM answers are not scored here)",
   "n_questions": 24,
@@ -8,7 +8,7 @@
   "recall_at_1": 0.8947,
   "recall_at_5": 1.0,
   "mrr": 0.9474,
-  "answer_contains_evidence": 0.7368,
+  "answer_contains_evidence": 0.9474,
   "refusal_accuracy_unanswerable": 1.0,
   "false_refusals_answerable": 0,
   "rows": [
@@ -44,8 +44,8 @@
       "question": "What is the difference between classification and regression?",
       "answerable": true,
       "rank": 1,
-      "answer": "4. Review Questions: Q1. What is the difference between classification and regression? Answer:",
-      "answer_has_evidence": false,
+      "answer": "Answer: Classification predicts a discrete category, while regression predicts a continuous numerical value. Q2. Common tasks are classification, where the target is a category, and regression, where the target is a number.",
+      "answer_has_evidence": true,
       "refused": false
     },
     {
@@ -53,7 +53,7 @@
       "question": "Why should a model not be evaluated on its training data?",
       "answerable": true,
       "rank": 1,
-      "answer": "MSE = (1/n) * \u03a3 (y_i \u2212 \u0177_i)\u00b2 Important: Never evaluate a model on the same data that was used to train it.",
+      "answer": "* \u03a3 (y_i \u2212 \u0177_i)\u00b2 Important: Never evaluate a model on the same data that was used to train it.",
       "answer_has_evidence": true,
       "refused": false
     },
@@ -62,8 +62,8 @@
       "question": "What is regression?",
       "answerable": true,
       "rank": 2,
-      "answer": "4. Review Questions: Q1. What is the difference between classification and regression? Answer: Classification predicts a discrete category, while regression predicts a continuous numerical value. Q2.",
-      "answer_has_evidence": false,
+      "answer": "Answer: Classification predicts a discrete category, while regression predicts a continuous numerical value. Q2. Common tasks are classification, where the target is a category, and regression, where the target is a number.",
+      "answer_has_evidence": true,
       "refused": false
     },
     {
@@ -116,8 +116,8 @@
       "question": "Where does the Calvin cycle happen?",
       "answerable": true,
       "rank": 1,
-      "answer": "Exam Practice: 1. Where in the chloroplast does the Calvin cycle happen? Answer:",
-      "answer_has_evidence": false,
+      "answer": "The Calvin cycle: In the stroma, carbon dioxide is fixed by the enzyme RuBisCO and, using ATP and NADPH, is turned into glucose over several turns of the cycle. 6CO2",
+      "answer_has_evidence": true,
       "refused": false
     },
     {
@@ -125,7 +125,7 @@
       "question": "Where does the oxygen released in photosynthesis come from?",
       "answerable": true,
       "rank": 1,
-      "answer": "6CO2 + 6H2O + light \u2192 C6H12O6 + 6O2 Remember: the oxygen released comes from water, not from carbon dioxide.",
+      "answer": "+ 6H2O + light \u2192 C6H12O6 + 6O2 Remember: the oxygen released comes from water, not from carbon dioxide.",
       "answer_has_evidence": true,
       "refused": false
     },
@@ -143,7 +143,7 @@
       "question": "Which enzyme fixes carbon dioxide?",
       "answerable": true,
       "rank": 1,
-      "answer": "The Calvin cycle: In the stroma, carbon dioxide is fixed by the enzyme RuBisCO and, using ATP and NADPH, is turned into glucose over several turns of the cycle.",
+      "answer": "The Calvin cycle: In the stroma, carbon dioxide is fixed by the enzyme RuBisCO and, using ATP and NADPH, is turned into glucose over several turns of the cycle. 6CO2",
       "answer_has_evidence": true,
       "refused": false
     },
@@ -170,8 +170,8 @@
       "question": "When was the Bastille stormed?",
       "answerable": true,
       "rank": 1,
-      "answer": "2.1 The storming of the Bastille:",
-      "answer_has_evidence": false,
+      "answer": "2.1 The storming of the Bastille: On 14 July 1789 crowds in Paris attacked the Bastille fortress, a symbol of royal authority, looking for gunpowder and weapons.",
+      "answer_has_evidence": true,
       "refused": false
     },
     {
@@ -179,7 +179,7 @@
       "question": "Who led the Committee of Public Safety?",
       "answerable": true,
       "rank": 1,
-      "answer": "2.2 The Reign of Terror: Between 1793 and 1794 the Committee of Public Safety, led by Robespierre, executed thousands of people accused of opposing the revolution. Example:",
+      "answer": "2.2 The Reign of Terror: Between 1793 and 1794 the Committee of Public Safety, led by Robespierre, executed thousands of people accused of opposing the revolution.",
       "answer_has_evidence": true,
       "refused": false
     },
@@ -206,7 +206,7 @@
       "question": "What happened to Marie Antoinette?",
       "answerable": true,
       "rank": 1,
-      "answer": "Queen Marie Antoinette was tried and guillotined in October 1793.",
+      "answer": "Example: Queen Marie Antoinette was tried and guillotined in October 1793.",
       "answer_has_evidence": true,
       "refused": false
     },

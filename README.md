@@ -234,6 +234,13 @@ cd frontend && npm test                  # frontend unit: 34 tests
 cd frontend && npx playwright test       # browser e2e: 13 tests incl. the critical acceptance test
 ```
 
+## Publish online
+
+One container serves the website and the API (root `Dockerfile`). On Render:
+**New → Blueprint**, pick this repository and branch, set a site password
+(`WRITEAI_API_TOKEN`) and apply. Details and free-plan limits:
+[docs/deployment.md](docs/deployment.md).
+
 ## Environment variables
 
 See **[.env.example](.env.example)**. Key ones:
@@ -248,7 +255,9 @@ See **[.env.example](.env.example)**. Key ones:
 | `WRITEAI_DATA_DIR` | `./data` | DB, uploads, renders, vectors |
 | `WRITEAI_DATABASE_URL` | SQLite | e.g. PostgreSQL |
 | `WRITEAI_MAX_UPLOAD_MB` / `WRITEAI_MAX_PAGES` | 20 / 300 | Upload limits |
-| `WRITEAI_API_TOKEN` | — | Optional shared token for demos |
+| `WRITEAI_API_TOKEN` | — | Site password (login page + cookie); recommended when published |
+| `WRITEAI_CV_THREADS` | — | OpenCV threads; `1` on small servers (set in the Dockerfile) |
+| `WRITEAI_STATIC_DIR` | — | Built web UI to serve from the API (set in the Dockerfile) |
 
 ## API
 

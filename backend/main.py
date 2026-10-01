@@ -12,7 +12,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 
-from backend.api.routes import router
+from backend.api.routes import auth_router, router
 from backend.config import get_settings
 from backend.database.session import init_engine
 from backend.services.errors import AppError
@@ -85,6 +85,7 @@ def create_app() -> FastAPI:
             "embedder": get_embedder().name,
         }
 
+    app.include_router(auth_router)
     app.include_router(router)
     if settings.static_dir is not None:
         _serve_web_ui(app, settings.static_dir.resolve())

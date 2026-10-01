@@ -30,7 +30,10 @@ def _nlp():
     try:
         import spacy
 
-        nlp = spacy.load("en_core_web_sm", disable=["ner", "lemmatizer", "tagger", "attribute_ruler"])
+        # Only sentence boundaries are needed: the small "senter" component
+        # (~17 MB) instead of the dependency parser (~96 MB of memory).
+        nlp = spacy.load("en_core_web_sm", exclude=["ner", "lemmatizer", "tagger", "attribute_ruler", "parser", "tok2vec"])
+        nlp.enable_pipe("senter")
         nlp.max_length = 3_000_000
         return nlp
     except Exception as exc:  # model not installed → regex fallback

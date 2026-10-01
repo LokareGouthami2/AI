@@ -12,6 +12,10 @@ from backend.layout.settings import RenderSettings
 Mode = Literal["preserve", "clean", "smart", "assignment", "exam", "simple"]
 
 
+class LoginIn(BaseModel):
+    password: str = Field(min_length=1, max_length=200)
+
+
 class ErrorBody(BaseModel):
     code: str
     message: str

@@ -18,10 +18,15 @@ and the quality audit can still read every word back.
 from __future__ import annotations
 
 import hashlib
+import os
 
 import cv2
 import numpy as np
 import pymupdf as fitz  # PyMuPDF
+
+# Small servers: OpenCV's worker threads each keep page-sized buffers.
+if os.environ.get("WRITEAI_CV_THREADS"):
+    cv2.setNumThreads(int(os.environ["WRITEAI_CV_THREADS"]))
 
 FINAL_DPI = 200
 PREVIEW_DPI = 130
@@ -33,8 +38,11 @@ def _seed(*parts: object) -> int:
 
 def ink_mask(rgb: np.ndarray) -> np.ndarray:
     """0..1 amount of ink per pixel (anything darker than the paper)."""
-    lum = rgb.astype(np.float32).min(axis=2) / 255.0
-    return np.clip((0.97 - lum) / 0.7, 0.0, 1.0)
+    m = rgb.min(axis=2).astype(np.float32)  # darkest channel, 8-bit → one float plane
+    m *= -1.0 / (255.0 * 0.7)
+    m += 0.97 / 0.7
+    np.clip(m, 0.0, 1.0, out=m)
+    return m
 
 
 def back_of_page(masks: list[np.ndarray], i: int) -> np.ndarray:
@@ -51,11 +59,14 @@ def back_of_page(masks: list[np.ndarray], i: int) -> np.ndarray:
 
 def _smooth_noise(rng, h: int, w: int, sigma: float, amp: float) -> np.ndarray:
     """Smooth random field with standard deviation ``amp`` and feature size
-    ``sigma`` px. Drawn at low resolution and resized, so it is cheap."""
+    ``sigma`` px. Large features are drawn at low resolution and resized;
+    everything is done in place (one page-sized float32 plane)."""
     step = max(1, int(sigma / 2))
     small = rng.standard_normal((h // step + 3, w // step + 3), dtype=np.float32)
-    small = cv2.GaussianBlur(small, (0, 0), max(0.5, sigma / step))
-    small *= amp / max(1e-6, float(small.std()))
+    cv2.GaussianBlur(small, (0, 0), max(0.5, sigma / step), dst=small)
+    small *= amp / max(1e-6, float(small[::4, ::4].std()))  # std from a sample: no page-sized temporaries
+    if step == 1:
+        return small[:h, :w]
     return cv2.resize(small, (w, h), interpolation=cv2.INTER_CUBIC)
 
 
@@ -90,9 +101,13 @@ def pen_groove_shadow(img: np.ndarray, ink: np.ndarray, k: float) -> None:
     m = np.float32([[1, 0, d], [0, 1, d]])
     shadow = cv2.warpAffine(ink, m, (w, h), flags=cv2.INTER_LINEAR, borderValue=0)
     cv2.GaussianBlur(shadow, (0, 0), 0.9 * k, dst=shadow)
-    shadow *= 1.0 - ink  # only on paper, never over the ink itself
+    np.subtract(1.0, ink, out=ink)
+    shadow *= ink  # only on paper, never over the ink itself
+    plane = ink  # reuse the buffer
     for c, tone in enumerate((0.14, 0.14, 0.12)):  # grey, a touch warm
-        img[..., c] *= 1.0 - tone * shadow
+        np.multiply(shadow, -tone, out=plane)
+        plane += 1.0
+        img[..., c] *= plane
 
 
 def scan_effect(rgb: np.ndarray, seed: int, dpi: int, back: np.ndarray | None = None, look: str = "scanned", thin_px: int = 0, through: str = "medium", pen_shadow: bool = False) -> np.ndarray:
@@ -188,28 +203,29 @@ def scan_effect(rgb: np.ndarray, seed: int, dpi: int, back: np.ndarray | None = 
     img *= light[..., None]
     del light
 
-    # 6. Page slightly tilted and shifted on the scanner bed.
+    # 6. Scanner tone curve (slightly more contrast in the darks), then back
+    # to 8-bit: the geometric steps below run on the 4x smaller image.
+    np.clip(img, 0.0, 1.0, out=img)
+    np.power(img, 1.06, out=img)
+    img *= 255.0
+    out = img.astype(np.uint8)
+    del img
+
+    # 7. Page slightly tilted and shifted on the scanner bed.
     tilt = rng.normal(0, 0.35)
     tilt = float(np.clip(tilt * (1.6 if photo else 1.0), -1.3, 1.3))
     m = cv2.getRotationMatrix2D((w / 2, h / 2), tilt, 1.0)
     m[:, 2] += rng.normal(0, 3 * k, 2)
-    bed = tuple(float(v) for v in (np.array([0.80, 0.80, 0.79]) + rng.normal(0, 0.01, 3)))
-    img = cv2.warpAffine(img, m, (w, h), flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT, borderValue=bed)
-
-    # 7. Scanner tone curve (slightly more contrast in the darks).
-    np.clip(img, 0.0, 1.0, out=img)
-    np.power(img, 1.06, out=img)
+    bed = tuple(float(v) * 255 for v in (np.array([0.80, 0.80, 0.79]) + rng.normal(0, 0.01, 3)) ** 1.06)
+    out = cv2.warpAffine(out, m, (w, h), flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT, borderValue=bed)
 
     # 8. A few dust specks.
     for _ in range(int(rng.integers(3, 12))):
         x, y = int(rng.uniform(0, w)), int(rng.uniform(0, h))
         r = max(1, int(rng.uniform(0.6, 1.8) * k))
-        v = float(rng.uniform(0.35, 0.75))
-        cv2.circle(img, (x, y), r, (v, v, v), -1, lineType=cv2.LINE_AA)
-
-    np.clip(img, 0.0, 1.0, out=img)
-    img *= 255.0
-    return img.astype(np.uint8)
+        v = float(rng.uniform(0.35, 0.75)) ** 1.06 * 255
+        cv2.circle(out, (x, y), r, (v, v, v), -1, lineType=cv2.LINE_AA)
+    return out
 
 
 def _pixels(page, dpi: int) -> np.ndarray:
@@ -235,6 +251,8 @@ def scanned_pdf(visible_pdf: bytes, text_layer_pdf: bytes, seed_key: str, dpi: i
             new = out.new_page(width=page.rect.width, height=page.rect.height)
             new.insert_image(new.rect, stream=jpg.tobytes())
             new.show_pdf_page(new.rect, layer, i)
+            del rgb, scanned, jpg
+            fitz.TOOLS.store_shrink(100)  # MuPDF caches render data without limit: drop this page's
         meta = dict(src.metadata)
     out.set_metadata({k: v for k, v in meta.items() if k in ("title", "author", "subject", "keywords", "creator", "producer")})
     data = out.tobytes(garbage=3, deflate=True)

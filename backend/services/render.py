@@ -3,6 +3,7 @@ revision the client names (never stale content, never raw AI output)."""
 
 from __future__ import annotations
 
+import threading
 from pathlib import Path
 
 from sqlalchemy import select
@@ -20,6 +21,7 @@ from backend.pdf.scan import PREVIEW_DPI as SCAN_PREVIEW_DPI
 from backend.quality.checker import audit_pdf, check_layout
 from backend.services import content as content_service
 from backend.services.errors import AppError, not_found
+from backend.services.jobs import release_memory
 
 PREVIEW_DPI = 110
 
@@ -48,10 +50,20 @@ def _pinned_head(db: Session, document_id: str, expected_revision: int):
     return head, wdm.parse(head.content)
 
 
+# Page rendering is the memory-heavy step: one at a time, so a preview and a
+# final render together can't double the peak on a small server.
+_render_lock = threading.Lock()
+
+
 def build_pdf(dl, settings: RenderSettings, meta: dict, dpi: int) -> tuple[bytes, bytes]:
     """(output PDF, vector PDF). For "scanned" output the visible pages are
     scan-processed images with an invisible text layer; the vector PDF is
     kept for the underline audit."""
+    with _render_lock:
+        return _build_pdf(dl, settings, meta, dpi)
+
+
+def _build_pdf(dl, settings: RenderSettings, meta: dict, dpi: int) -> tuple[bytes, bytes]:
     visible = render_pdf(dl, meta)
     if settings.output == "clean":
         return visible, visible
@@ -86,6 +98,8 @@ def preview(db: Session, document_id: str, expected_revision: int, settings: Ren
         report = check_layout(doc, dl)
         pdf, _ = build_pdf(dl, s, _meta(head, doc.title, s_hash), SCAN_PREVIEW_DPI)
         pngs = rasterize(pdf, dpi=PREVIEW_DPI)
+        del pdf
+        release_memory()
         paths = []
         for i, png in enumerate(pngs, start=1):
             p = out_dir / f"{key}-p{i}.png"

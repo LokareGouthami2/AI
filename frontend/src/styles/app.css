@@ -237,3 +237,5 @@ table.table { width: 100%; border-collapse: collapse; }
   .hero h1 { font-size: 32px; }
   .ProseMirror, .doc-title-input { padding-left: 16px; padding-right: 16px; }
 }
+
+.login { max-width: 380px; margin: 12vh auto 0; }

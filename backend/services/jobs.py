@@ -28,6 +28,17 @@ def create_job(kind: str, document_id: str | None) -> str:
         return job.id
 
 
+def release_memory() -> None:
+    """Hand freed heap memory back to the OS after a big job (glibc keeps it
+    otherwise), so a small server's footprint returns to baseline."""
+    try:
+        import ctypes
+
+        ctypes.CDLL("libc.so.6").malloc_trim(0)
+    except Exception:  # pragma: no cover - not glibc (macOS, Windows, musl)
+        pass
+
+
 def _run(job_id: str, fn: Callable[..., dict | None], args: tuple) -> None:
     with session_scope() as db:
         job = db.get(Job, job_id)
@@ -46,6 +57,8 @@ def _run(job_id: str, fn: Callable[..., dict | None], args: tuple) -> None:
         with session_scope() as db:
             job = db.get(Job, job_id)
             job.status, job.error, job.finished_at = "failed", msg, utcnow()
+    finally:
+        release_memory()
 
 
 def submit(kind: str, document_id: str | None, fn: Callable[..., dict | None], *args) -> str:

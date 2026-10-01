@@ -263,3 +263,37 @@ def test_single_container_serves_web_ui(tmp_path, monkeypatch):
     finally:
         monkeypatch.delenv("WRITEAI_STATIC_DIR")
         get_settings.cache_clear()
+
+
+def test_site_password_login_cookie(monkeypatch):
+    """WRITEAI_API_TOKEN: the web UI logs in once; an HttpOnly cookie then
+    covers API calls, preview images and downloads."""
+    from fastapi.testclient import TestClient
+
+    from backend.config import get_settings
+    from backend.main import create_app
+
+    monkeypatch.setenv("WRITEAI_API_TOKEN", "correct horse")
+    get_settings.cache_clear()
+    try:
+        with TestClient(create_app()) as c:
+            assert c.get("/api/health").status_code == 200  # health stays open for the host
+            assert c.get("/api/auth/status").json() == {"password_required": True, "logged_in": False}
+            assert c.get("/api/documents").status_code == 401
+            r = c.post("/api/auth/login", json={"password": "wrong"})
+            assert r.status_code == 401 and "set-cookie" not in r.headers
+            r = c.post("/api/auth/login", json={"password": "correct horse"})
+            assert r.status_code == 200
+            cookie = r.headers["set-cookie"].lower()
+            assert "httponly" in cookie and "samesite=strict" in cookie and "correct horse" not in cookie
+            assert c.get("/api/auth/status").json()["logged_in"] is True
+            assert c.get("/api/documents").status_code == 200
+            assert c.get("/api/documents", headers={"X-API-Token": "correct horse"}).status_code == 200
+            c.post("/api/auth/logout")
+            c.cookies.clear()
+            assert c.get("/api/documents").status_code == 401
+            c.cookies.set("writeai_session", "forged", path="/api")
+            assert c.get("/api/documents").status_code == 401
+    finally:
+        monkeypatch.delenv("WRITEAI_API_TOKEN")
+        get_settings.cache_clear()

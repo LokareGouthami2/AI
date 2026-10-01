@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
+import hmac
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, File, Query, UploadFile
+from fastapi import APIRouter, Depends, File, Query, Request, UploadFile
 from fastapi.responses import FileResponse, Response
 from sqlalchemy.orm import Session
 
-from backend.api.deps import rate_limit, require_token
+from backend.api.deps import SESSION_COOKIE, rate_limit, require_token, session_value, token_ok
 from backend.config import get_settings
 from backend.database.session import get_db
 from backend.editor import wdm
@@ -24,6 +25,38 @@ from backend.services import study as study_service
 from backend.services.errors import AppError, not_found
 
 router = APIRouter(prefix="/api", dependencies=[Depends(require_token)])
+# Login endpoints must be reachable before logging in.
+auth_router = APIRouter(prefix="/api/auth")
+
+
+@auth_router.get("/status")
+def auth_status(request: Request):
+    return {"password_required": get_settings().api_token is not None, "logged_in": token_ok(request)}
+
+
+@auth_router.post("/login", dependencies=[Depends(rate_limit("login", 10))])
+def auth_login(body: S.LoginIn, request: Request, response: Response):
+    token = get_settings().api_token
+    if token is None:
+        return {"ok": True}
+    if not hmac.compare_digest(body.password.encode(), token.get_secret_value().encode()):
+        raise AppError(401, "WRONG_PASSWORD", "That password is not correct.")
+    response.set_cookie(
+        SESSION_COOKIE,
+        session_value(token.get_secret_value()),
+        max_age=30 * 24 * 3600,
+        httponly=True,
+        samesite="strict",
+        secure=request.url.scheme == "https" or request.headers.get("x-forwarded-proto") == "https",
+        path="/api",
+    )
+    return {"ok": True}
+
+
+@auth_router.post("/logout")
+def auth_logout(response: Response):
+    response.delete_cookie(SESSION_COOKIE, path="/api")
+    return {"ok": True}
 
 
 def _job_out(db: Session, job_id: str) -> S.JobOut:

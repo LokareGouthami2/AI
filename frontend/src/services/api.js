@@ -34,6 +34,8 @@ async function request(method, path, body, { raw = false, signal } = {}) {
   const data = await res.json().catch(() => null);
   if (!res.ok) {
     const err = data?.error || {};
+    // Site password set and not (or no longer) logged in: show the login page.
+    if (res.status === 401 && err.code === 'UNAUTHORIZED') window.dispatchEvent(new Event('writeai:unauthorized'));
     throw new ApiError(res.status, err.code || 'HTTP_' + res.status, err.message || res.statusText, err.details || {});
   }
   return data;
@@ -41,6 +43,9 @@ async function request(method, path, body, { raw = false, signal } = {}) {
 
 export const api = {
   health: () => request('GET', '/api/health'),
+  authStatus: () => request('GET', '/api/auth/status'),
+  login: (password) => request('POST', '/api/auth/login', { password }),
+  logout: () => request('POST', '/api/auth/logout'),
   listDocuments: () => request('GET', '/api/documents'),
   getDocument: (id) => request('GET', `/api/documents/${id}`),
   deleteDocument: (id) => request('DELETE', `/api/documents/${id}`),

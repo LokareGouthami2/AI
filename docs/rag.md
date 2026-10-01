@@ -58,7 +58,7 @@ Measured with the hashing embedder and the **offline extractive answerer**:
 | Retrieval Recall@1 | 0.895 |
 | Retrieval Recall@5 | **1.000** |
 | MRR | 0.947 |
-| Answer contains the evidence (offline answerer) | 0.737 |
+| Answer contains the evidence (offline answerer) | 0.947 |
 | Unanswerable questions correctly refused | **5 / 5** |
 | Answerable questions wrongly refused | 0 |
 
