@@ -1,3 +1,5 @@
+import { cleanSettings } from '../preview/settings.js';
+
 /** Thin fetch wrapper around the WriteAI REST API. No secrets live here:
  * the browser only ever talks to our backend. */
 
@@ -66,11 +68,11 @@ export const api = {
   getVersion: (id, n) => request('GET', `/api/documents/${id}/versions/${n}`),
   restoreVersion: (id, n) => request('POST', `/api/documents/${id}/versions/${n}/restore`),
   styles: () => request('GET', '/api/handwriting/styles'),
-  getRenderSettings: (id) => request('GET', `/api/documents/${id}/render-settings`),
-  saveRenderSettings: (id, s) => request('PUT', `/api/documents/${id}/render-settings`, s),
-  preview: (id, expectedRevision, settings) => request('POST', `/api/documents/${id}/preview`, { expected_revision: expectedRevision, settings }),
+  getRenderSettings: (id) => request('GET', `/api/documents/${id}/render-settings`).then(cleanSettings),
+  saveRenderSettings: (id, s) => request('PUT', `/api/documents/${id}/render-settings`, cleanSettings(s)),
+  preview: (id, expectedRevision, settings) => request('POST', `/api/documents/${id}/preview`, { expected_revision: expectedRevision, settings: cleanSettings(settings) }),
   validate: (id, expectedRevision, settings) => request('POST', `/api/documents/${id}/validate`, { expected_revision: expectedRevision, settings }),
-  render: (id, expectedRevision, settings) => request('POST', `/api/documents/${id}/render`, { expected_revision: expectedRevision, settings }),
+  render: (id, expectedRevision, settings) => request('POST', `/api/documents/${id}/render`, { expected_revision: expectedRevision, settings: cleanSettings(settings) }),
   ask: (id, question) => request('POST', `/api/documents/${id}/ask`, { question }),
   flashcards: (id, count) => request('POST', `/api/documents/${id}/flashcards`, { count }),
   latestFlashcards: (id) => request('GET', `/api/documents/${id}/flashcards`),

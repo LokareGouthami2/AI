@@ -239,3 +239,7 @@ table.table { width: 100%; border-collapse: collapse; }
 }
 
 .login { max-width: 380px; margin: 12vh auto 0; }
+.field { position: relative; }
+/* Overlaid, not in the flow: showing/hiding it must never move the buttons. */
+.field-hint { color: var(--danger); position: absolute; left: 0; top: 100%; margin-top: 2px; white-space: nowrap; pointer-events: none; }
+.input[aria-invalid="true"] { border-color: var(--danger); }

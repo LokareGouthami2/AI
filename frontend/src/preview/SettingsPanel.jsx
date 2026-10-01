@@ -1,32 +1,8 @@
 import { useEffect, useState } from 'react';
 import { api } from '../services/api.js';
+import { DEFAULT_SETTINGS } from './settings.js';
 
-export const DEFAULT_SETTINGS = {
-  style: 'quick',
-  ink: 'blue',
-  paper: 'ruled',
-  page_size: 'A4',
-  font_size: 16,
-  line_spacing: 1.6,
-  paragraph_spacing: 1,
-  margin_top_mm: 22,
-  margin_bottom_mm: 20,
-  margin_left_mm: 28,
-  margin_right_mm: 15,
-  page_numbers: true,
-  page_number_position: 'bottom',
-  header_name: '',
-  header_id: '',
-  underline_headings: false,
-  plain_headings: false,
-  show_through: false,
-  show_through_level: 'medium',
-  pen_shadow: false,
-  watermark: false,
-  output: 'scanned',
-  variation: 1,
-  seed: 0,
-};
+export { DEFAULT_SETTINGS } from './settings.js';
 
 /**
  * "Assignment sheet": loose unruled paper with a header line and margin line,
@@ -75,11 +51,35 @@ function Text({ label, value, onChange, placeholder, testid }) {
   );
 }
 
+/**
+ * Number field that never sends an invalid value: while you type (e.g. the
+ * "1" of "18", or an empty box) the last valid number stays in effect, and
+ * leaving the field restores it if what you typed is out of range.
+ */
 function Num({ label, value, onChange, min, max, step = 1 }) {
+  const [draft, setDraft] = useState(String(value));
+  useEffect(() => setDraft(String(value)), [value]);
+  const n = Number(draft);
+  const valid = draft.trim() !== '' && Number.isFinite(n) && n >= min && n <= max;
   return (
     <label className="field">
       <span>{label}</span>
-      <input className="input" type="number" value={value} min={min} max={max} step={step} onChange={(e) => onChange(Number(e.target.value))} />
+      <input
+        className="input"
+        type="number"
+        value={draft}
+        min={min}
+        max={max}
+        step={step}
+        aria-invalid={!valid}
+        onChange={(e) => {
+          setDraft(e.target.value);
+          const v = Number(e.target.value);
+          if (e.target.value.trim() !== '' && Number.isFinite(v) && v >= min && v <= max) onChange(v);
+        }}
+        onBlur={() => setDraft(String(value))}
+      />
+      {!valid && <span className="small field-hint">Allowed: {min}–{max}. Using {value}.</span>}
     </label>
   );
 }

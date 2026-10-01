@@ -42,3 +42,22 @@ test('assignment sheet preset renders header, top-right page numbers and heading
   await expect(page.getByTestId('underline-headings')).toHaveValue('no');
   await expect(page.getByTestId('header-name')).toHaveValue('Test Student');
 });
+
+test('Update Preview and Generate Final PDF work while a number box is being edited', async ({ page, request }) => {
+  const id = await createDocWithContent(request, [H(1, 'Numbers'), P('Some text to render in handwriting for this test.')], 'Numbers');
+  await page.goto(`/documents/${id}/render`);
+  const font = page.getByLabel('Font size (pt)');
+  await font.fill(''); // empty box: must not send font size 0
+  await expect(page.getByText('Allowed: 10–28.')).toBeVisible();
+  await font.pressSequentially('1'); // on the way to 18: 1 is out of range
+  await page.getByTestId('update-preview').click();
+  await expect(page.getByTestId('preview-page').first()).toBeVisible({ timeout: 60_000 });
+  await expect(page.locator('.preview-pane .alert-danger')).toHaveCount(0);
+  await expect(font).toHaveValue('16'); // leaving the box restored the last valid size
+  await font.fill('');
+  await font.pressSequentially('18');
+  await page.getByTestId('render-generate').click();
+  await expect(page.getByTestId('render-download')).toBeVisible({ timeout: 90_000 });
+  const saved = await (await request.get(`/api/documents/${id}/render-settings`)).json();
+  expect(saved.font_size).toBe(18);
+});

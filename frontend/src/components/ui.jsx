@@ -9,11 +9,26 @@ export function Spinner({ label }) {
   );
 }
 
+/** Plain-language text for an API error. Validation errors name the field
+ * instead of a generic "The request is invalid." */
+export function errorText(error) {
+  const errs = error?.code === 'VALIDATION_ERROR' ? error.details?.errors || [] : [];
+  if (errs.some((e) => /extra inputs are not permitted/i.test(e.msg || ''))) {
+    return 'The WriteAI server on this computer is older than the website. Restart it: close the WriteAI windows and run scripts/dev.ps1 again (or scripts/dev.sh).';
+  }
+  if (errs.length) {
+    const label = (loc) => (loc || '').split('.').pop().replace(/_mm$/, ' (mm)').replace(/_/g, ' ');
+    return 'Please check: ' + errs.map((e) => `${label(e.loc)} – ${e.msg}`).join('; ');
+  }
+  if (error?.code === 'NETWORK') return 'Cannot reach the WriteAI server. Is it still running? Start it again with scripts/dev.ps1.';
+  return error?.message || String(error);
+}
+
 export function ErrorAlert({ error }) {
   if (!error) return null;
   return (
     <div className="alert alert-danger" role="alert">
-      {error.message || String(error)}
+      {errorText(error)}
     </div>
   );
 }
