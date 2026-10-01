@@ -70,7 +70,7 @@ def _draw_paper(c: canvas.Canvas, dl: DisplayList) -> None:
         top = dl.header.rule_y if dl.header and dl.header.rule_y is not None else dl.height - 15 * MM
         c.line(0, top, dl.width, top)
         mx = x0 - 3 * MM
-        c.line(mx, 0, mx, top)
+        c.line(mx, 0, mx, dl.height)
 
 
 def _hand_text(c: canvas.Canvas, dl: DisplayList, text: str, x: float, y: float, size: float, shade: float, invisible: bool, key: object, align_right: bool = False) -> None:
@@ -185,7 +185,7 @@ def render_pdf(dl: DisplayList, meta: dict | None = None, text_layer_only: bool 
                 # Text matrix = rotation (hand movement) x shear (slant).
                 r, k = math.radians(g.rot), math.tan(math.radians(g.skew))
                 cr, sr = math.cos(r), math.sin(r)
-                t.setTextTransform(cr, sr, cr * k - sr, sr * k + cr, g.x, g.y)
+                t.setTextTransform(cr * g.xs, sr * g.xs, cr * k - sr, sr * k + cr, g.x, g.y)
                 t.textOut(g.ch)
             c.drawText(t)
             c.restoreState()

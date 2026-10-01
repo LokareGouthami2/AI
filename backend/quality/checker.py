@@ -209,7 +209,7 @@ def check_layout(doc: WDMDocument, dl: DisplayList) -> QualityReport:
         "heading_rules": len(rules),
         "min_font_size": round(min_size, 2),
         "contrast_ratio": round(cr, 2),
-        "fill_ratio": round(sum(len(p.lines) for p in dl.pages) / max(1, len(dl.pages) * dl.slots_per_page), 3),
+        "fill_ratio": round(sum(len(p.lines) for p in dl.pages) / max(1, len(dl.pages) * dl.slots_per_page // dl.sub_slots), 3),
     }
     return QualityReport(not errors, errors, warnings, metrics, checks)
 

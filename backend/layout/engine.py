@@ -42,6 +42,7 @@ HEADING_SCALE = {1: 1.5, 2: 1.28, 3: 1.12}
 SIZE_MULT = {None: 1.0, "normal": 1.0, "small": 0.85, "large": 1.2, "xlarge": 1.4}
 INDENT_EM = 1.6  # list / quote indent per level, in font-size units
 MIN_READABLE_PT = 9.0
+MAX_CREEP_LINES = 6
 ROT_SIGMA = 1.1  # degrees; per-letter rotation (bounded at 2 sigma)
 
 
@@ -68,6 +69,7 @@ class Glyph:
     rot: float = 0.0  # small per-letter rotation in degrees (hand movement)
     weight: float = 0.0  # extra stroke width in pt (pen pressure)
     cont: bool = False  # first glyph of a line that continues a force-broken word
+    xs: float = 1.0  # horizontal scale of this letter (no two letters alike)
 
 
 @dataclass
@@ -127,8 +129,11 @@ def header_band(s: RenderSettings, W: float, H: float) -> HeaderBand | None:
     size = max(10.0, s.font_size * 0.9) * STYLES[s.style].size_scale
     y = H - 8 * MM - 0.75 * size
     lines = []
+    # On an assignment sheet the name is written from near the page edge,
+    # across the margin line, as students do.
+    hx = 7 * MM if s.paper == "assignment" else s.margin_left_mm * MM
     for t in texts:
-        lines.append((t, s.margin_left_mm * MM, y))
+        lines.append((t, hx, y))
         y -= 1.3 * size
     lowest = lines[-1][2] if lines else H - 8 * MM - 0.75 * size
     rule_y = (lowest - 0.6 * size) if s.paper == "assignment" else None
@@ -142,10 +147,11 @@ class DisplayList:
     height: float
     box: tuple[float, float, float, float]  # x0, y0 (bottom), x1, y1 (top)
     line_height: float
-    slots_per_page: int
+    slots_per_page: int  # in grid slots (sub_slots per written line)
     pages: list[PageOut]
     stats: dict = field(default_factory=dict)
     header: HeaderBand | None = None
+    sub_slots: int = 1
 
     def all_lines(self) -> list[LineBox]:
         return [ln for p in self.pages for ln in p.lines]
@@ -249,14 +255,15 @@ class _Measurer:
     def chars(self, flow: Flow, rng) -> list[Char | None]:
         """Chars with variation applied; ``None`` marks a hard break."""
         st = self.style
-        hscale = HEADING_SCALE.get(flow.heading_level or 0, 1.0)
+        plain = self.s.plain_headings
+        hscale = 1.0 if plain else HEADING_SCALE.get(flow.heading_level or 0, 1.0)
         out: list[Char | None] = []
         for node in flow.content:
             if isinstance(node, HardBreakNode):
                 out.append(None)
                 continue
             assert isinstance(node, TextNode)
-            bold = "bold" in node.marks or flow.heading_level is not None
+            bold = "bold" in node.marks or (flow.heading_level is not None and not plain)
             italic = "italic" in node.marks
             underline = "underline" in node.marks
             mult = SIZE_MULT.get(node.font_size, 1.0) * hscale
@@ -276,7 +283,13 @@ class _Measurer:
         """Upper bound on vertical displacement from drift, slope and jitter."""
         st, v = self.style, self.v
         rot = math.sin(math.radians(2 * ROT_SIGMA * v)) * size  # per-letter rotation
-        return 2 * st.drift * v * self.s.font_size + 2 * 0.003 * v * width + 2 * st.baseline_var * v * size + rot
+        return 2 * st.drift * v * self.s.font_size + (2 * 0.003 * v + abs(st.rise)) * width + 2 * st.baseline_var * v * size + rot
+
+    def creep_room(self, flow: Flow) -> float:
+        """Width reserved for the left edge creeping right down a paragraph."""
+        if flow.align not in ("left", "justify"):
+            return 0.0
+        return MAX_CREEP_LINES * self.style.margin_creep * self.s.font_size
 
     def typical_extent(self, size: float) -> tuple[float, float]:
         """Typical ascender height / descender depth of the style's typeface."""
@@ -389,6 +402,11 @@ def layout(doc: WDMDocument, settings: RenderSettings, content_hash: str = "") -
         y_top = min(y_top, floor - 0.25 * s.font_size * s.line_spacing)
     m = _Measurer(s)
     lh = s.font_size * s.line_spacing
+    # Ruled/grid paper: one slot per printed line. Unruled paper has nothing to
+    # line up with, so slots are a third of a line: a line that would touch
+    # the one above moves down a little, as a writer would, not a whole line.
+    sub = 1 if s.paper in ("ruled", "grid") else 3
+    grid = lh / sub
     box_w = x1 - x0
 
     flows = flatten(doc)
@@ -399,11 +417,11 @@ def layout(doc: WDMDocument, settings: RenderSettings, content_hash: str = "") -
             continue
         rng = seeded_rng("chars", s.seed, s.style, f.block_id, _flow_text(f))
         indent = f.indent_em * s.font_size
-        wrapped.append(m.wrap(m.chars(f, rng), box_w - indent))
+        wrapped.append(m.wrap(m.chars(f, rng), box_w - indent - m.creep_room(f)))
 
     # Reserve room below the last grid line for the deepest descender.
     max_desc = max((wl.desc for lines in wrapped for wl in lines), default=0.35 * m.base)
-    slots_per_page = max(3, int((y_top - y_bottom - max_desc - 1.0) // lh))
+    slots_per_page = max(3 * sub, int((y_top - y_bottom - max_desc - 1.0) // grid))
 
     def line_slots(wl: WrappedLine) -> int:
         """Uniform grid pitch for a line: typical ascender of this line's size
@@ -411,7 +429,7 @@ def layout(doc: WDMDocument, settings: RenderSettings, content_hash: str = "") -
         (not the line's actual letters) keeps spacing consistent."""
         asc_t, _ = m.typical_extent(wl.max_size)
         _, desc_t = m.typical_extent(m.base)
-        return max(1, math.ceil((asc_t + desc_t) / lh))
+        return max(sub, math.ceil((asc_t + desc_t) / grid))
 
     # Trailing empty paragraphs would only produce blank space / an empty page.
     last_content = max((i for i, f in enumerate(flows) if f.kind != "empty"), default=-1)
@@ -434,9 +452,9 @@ def layout(doc: WDMDocument, settings: RenderSettings, content_hash: str = "") -
         prev_line_glyphs = []
 
     def baseline_for(end_slot: int) -> float:
-        return y_top - (end_slot + 1) * lh + 1.0
+        return y_top - (end_slot + 1) * grid + 1.0
 
-    def place(f: Flow, wl: WrappedLine, per: int, first: bool, last: bool) -> None:
+    def place(f: Flow, wl: WrappedLine, per: int, first: bool, last: bool, index: int = 0) -> None:
         """Place one line at the current slot, moving it down a slot at a time
         if its glyphs would touch the previous line's ink or the top edge."""
         nonlocal slot, line_id, prev_line_glyphs, continued_word
@@ -450,10 +468,10 @@ def layout(doc: WDMDocument, settings: RenderSettings, content_hash: str = "") -
                 end_slot = per - 1
             snap = (len(page.glyphs), len(page.decorations), len(page.lines), len(page.markers))
             bl = baseline_for(end_slot)
-            lb, words = _place_line(page, f, wl, bl, x0, box_w, line_id, s, first, last)
+            lb, words = _place_line(page, f, wl, bl, x0, box_w, line_id, s, first, last, index)
             mine = page.glyphs[snap[0]:]
             too_high = any(g.y + fonts.font(g.font).ink_bounds(g.ch)[1] * g.size > y_top for g in mine)
-            if (too_high or glyphs_collide(prev_line_glyphs, mine)) and end_slot - slot < 6:
+            if (too_high or glyphs_collide(prev_line_glyphs, mine)) and end_slot - slot < 6 * sub:
                 del page.glyphs[snap[0]:], page.decorations[snap[1]:], page.lines[snap[2]:], page.markers[snap[3]:]
                 end_slot += 1
                 stats["collision_slots"] += 1
@@ -505,12 +523,12 @@ def layout(doc: WDMDocument, settings: RenderSettings, content_hash: str = "") -
         nonlocal slot, line_id, prev_line_glyphs
         f, lines = flows[i], wrapped[i]
         if f.kind == "empty":
-            if slot + 1 > slots_per_page:
+            if slot + sub > slots_per_page:
                 new_page()
-            bl = baseline_for(slot)
-            pages[-1].lines.append(LineBox(line_id, pages[-1].number, slot, 1, bl, x0, x0, bl, bl, f.block_id, "blank", ""))
+            bl = baseline_for(slot + sub - 1)
+            pages[-1].lines.append(LineBox(line_id, pages[-1].number, slot, sub, bl, x0, x0, bl, bl, f.block_id, "blank", ""))
             line_id += 1
-            slot += 1
+            slot += sub
             stats["blank_lines"] += 1
             prev_line_glyphs = []
         else:
@@ -518,16 +536,16 @@ def layout(doc: WDMDocument, settings: RenderSettings, content_hash: str = "") -
             if f.heading_level is not None:
                 # keep-with-next: the heading, any headings/blank lines that
                 # directly follow it, and the first 2 lines of the next text.
-                need = sum(per) + (s.paragraph_spacing if f.group_end else 0)
+                need = sum(per) + (s.paragraph_spacing * sub if f.group_end else 0)
                 for j in range(i + 1, len(flows)):
                     fj, wj = flows[j], wrapped[j]
                     if fj.kind == "empty":
-                        need += 1
+                        need += sub
                         continue
                     need += sum(line_slots(wl) for wl in wj[:2])
                     if fj.heading_level is None:
                         break
-                    need += s.paragraph_spacing if fj.group_end else 0
+                    need += s.paragraph_spacing * sub if fj.group_end else 0
                 heading_fits = sum(per) <= slots_per_page
                 if slot > 0 and slot + need > slots_per_page and (need <= slots_per_page or heading_fits):
                     stats["orphan_headings_avoided"] += 1
@@ -561,13 +579,13 @@ def layout(doc: WDMDocument, settings: RenderSettings, content_hash: str = "") -
                         continue
                 page_before = len(pages)
                 for k in range(idx, idx + fit):
-                    place(f, lines[k], per[k], k == 0, k == n - 1)
+                    place(f, lines[k], per[k], k == 0, k == n - 1, k)
                 idx += fit
                 if idx < n and len(pages) == page_before:
                     new_page()
         if f.group_end and f.kind != "empty" and i < len(flows) - 1 and s.paragraph_spacing:
             if slot > 0:
-                slot = min(slot + s.paragraph_spacing, slots_per_page)
+                slot = min(slot + s.paragraph_spacing * sub, slots_per_page)
                 prev_line_glyphs = []
         if slot >= slots_per_page and i < len(flows) - 1:
             new_page()
@@ -618,7 +636,7 @@ def layout(doc: WDMDocument, settings: RenderSettings, content_hash: str = "") -
         style=style.name,
         content_hash=content_hash,
     )
-    return DisplayList(s, W, H, (x0, y_bottom, x1, y_top), lh, slots_per_page, pages, stats, band)
+    return DisplayList(s, W, H, (x0, y_bottom, x1, y_top), lh, slots_per_page, pages, stats, band, sub)
 
 
 def glyphs_collide(upper: list[Glyph], lower: list[Glyph], tol: float = 0.3) -> bool:
@@ -646,11 +664,16 @@ def _flow_text(f: Flow) -> str:
     return "".join(n.text if isinstance(n, TextNode) else "\n" for n in f.content)
 
 
-def _place_line(page: PageOut, f: Flow, wl: WrappedLine, baseline: float, x0: float, box_w: float, line_id: int, s: RenderSettings, first: bool, last: bool) -> tuple[LineBox, list[str]]:
+def _place_line(page: PageOut, f: Flow, wl: WrappedLine, baseline: float, x0: float, box_w: float, line_id: int, s: RenderSettings, first: bool, last: bool, index: int = 0) -> tuple[LineBox, list[str]]:
     style = STYLES[s.style]
     v = s.variation
     indent = f.indent_em * s.font_size
     avail = box_w - indent
+    if style.margin_creep and f.align in ("left", "justify"):
+        # A hand drifts right as it goes down a paragraph (wrap reserved room).
+        room = MAX_CREEP_LINES * style.margin_creep * s.font_size
+        indent += min(index, MAX_CREEP_LINES) * style.margin_creep * s.font_size
+        avail = box_w - indent - (room - min(index, MAX_CREEP_LINES) * style.margin_creep * s.font_size)
     rng = seeded_rng("line", s.seed, s.style, f.block_id, line_id, "".join(c.ch for w in wl.words for c in w))
 
     # Alignment
@@ -666,7 +689,7 @@ def _place_line(page: PageOut, f: Flow, wl: WrappedLine, baseline: float, x0: fl
 
     # Per-line drift: offset + gentle slope, both bounded.
     drift = bounded_gauss(rng, style.drift * v * s.font_size)
-    slope = bounded_gauss(rng, 0.003 * v)
+    slope = style.rise + bounded_gauss(rng, 0.003 * v)
 
     # Marker (bullet / number) in the hanging indent.
     if first and f.marker:
@@ -697,14 +720,15 @@ def _place_line(page: PageOut, f: Flow, wl: WrappedLine, baseline: float, x0: fl
         skew = style.slant_deg + bounded_gauss(rng, style.slant_var * v)
         shade = 0.84 + rng.random() * 0.16
         # Pen pressure: a subtle, continuous variation in stroke weight.
-        weight = rng.uniform(0.0, 0.011) * s.font_size * min(v, 1.5)
+        weight = rng.uniform(0.0, 0.011) * s.font_size * min(v, 1.5) * style.pressure
         words_out.append("".join(c.ch for c in word))
         for ci, c in enumerate(word):
             dy = drift + slope * (x - start) + bounded_gauss(rng, style.baseline_var * v * c.size)
             y = baseline + dy
             rot = bounded_gauss(rng, ROT_SIGMA * v)
             letter_shade = shade * (1.0 - rng.uniform(0.0, 0.07 * min(v, 1.5)))  # ink flow varies per letter
-            page.glyphs.append(Glyph(c.ch, x, y, c.size, c.font, skew + (10.0 if c.italic else 0.0), letter_shade, c.fake_bold, c.underline, False, line_id, c.adv, ci == 0 and wi > 0, rot, weight))
+            xs = 1.0 + bounded_gauss(rng, style.xscale_var * v)
+            page.glyphs.append(Glyph(c.ch, x, y, c.size, c.font, skew + (10.0 if c.italic else 0.0), letter_shade, c.fake_bold, c.underline, False, line_id, c.adv, ci == 0 and wi > 0, rot, weight, xs=xs))
             lo, hi = fonts.font(c.font).ink_bounds(c.ch)
             ink_top = max(ink_top, y + hi * c.size)
             ink_bottom = min(ink_bottom, y + lo * c.size)

@@ -8,14 +8,14 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-HandwritingStyle = Literal["neat", "casual", "cursive", "playful", "quick", "light", "ballpoint", "print"]
+HandwritingStyle = Literal["neat", "casual", "cursive", "playful", "quick", "light", "ballpoint", "print", "student"]
 
 
 class RenderSettings(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     style: HandwritingStyle = "quick"
-    ink: Literal["blue", "black"] = "blue"
+    ink: Literal["blue", "black", "ballpoint"] = "blue"
     # "assignment": unruled sheet with a top header line and a left margin
     # line, like loose exam / assignment paper.
     paper: Literal["ruled", "blank", "grid", "assignment"] = "ruled"
@@ -36,10 +36,15 @@ class RenderSettings(BaseModel):
     # Opt-in: a hand-drawn line under every heading. Never on unless the user
     # chooses it (underline marks in the text are a separate, explicit thing).
     underline_headings: bool = False
+    # Headings written like the body text (same size, not bold), as people
+    # do by hand; pair with underline_headings.
+    plain_headings: bool = False
     # Scanned look only: faint mirrored writing from the back of the sheet.
     show_through: bool = False
     watermark: bool = False  # optional small "Generated with WriteAI" footer
-    output: Literal["scanned", "clean"] = "scanned"  # scanned-document look or clean vector PDF
+    # scanned: flatbed/scan-app look; photo: a phone photo of the sheet (cool
+    # white paper, uneven light); clean: the vector PDF.
+    output: Literal["scanned", "photo", "clean"] = "scanned"
     variation: float = Field(default=1.0, ge=0.0, le=2.0, description="handwriting irregularity multiplier")
     seed: int = Field(default=0, ge=0, le=1_000_000)
 

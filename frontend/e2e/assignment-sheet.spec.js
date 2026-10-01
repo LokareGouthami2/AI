@@ -24,7 +24,7 @@ test('assignment sheet preset renders header, top-right page numbers and heading
     .poll(async () => (await (await request.get(`/api/documents/${id}/render-settings`)).json()).header_id, { timeout: 10_000 })
     .toBe('ROLL-123');
   const saved = await (await request.get(`/api/documents/${id}/render-settings`)).json();
-  expect(saved).toMatchObject({ paper: 'assignment', style: 'ballpoint', header_name: 'Test Student', underline_headings: true, show_through: true });
+  expect(saved).toMatchObject({ paper: 'assignment', style: 'student', ink: 'ballpoint', output: 'photo', header_name: 'Test Student', underline_headings: true, plain_headings: true, show_through: true });
 
   await page.getByTestId('update-preview').click();
   await expect(page.getByTestId('preview-page').first()).toBeVisible({ timeout: 60_000 });

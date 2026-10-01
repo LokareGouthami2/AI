@@ -17,6 +17,7 @@ perfectly legible, and is reproducible.
 | Light | Shadows Into Light (OFL) | Thin, airy |
 | Student ballpoint | Nothing You Could Do (OFL) | Fast, slanted ballpoint print |
 | Student print | Annie Use Your Telescope (OFL) | Thin upright print (+3° slant) |
+| Real student hand | Mynerve (OFL) | Round, partly joined ballpoint hand; wide word gaps, rising lines, creeping margin |
 
 The fonts are the Latin subsets from the `@fontsource/*` npm packages,
 converted WOFF → TTF with fontTools; licences are in `backend/assets/fonts/`.
@@ -82,11 +83,49 @@ exactly. The underline audit runs on the vector render before scanning.
 The "Generated with WriteAI" footer is **off by default** and can be switched
 on in the settings.
 
+## Writer habits (style profile)
+
+A font repeats the same glyph for every letter; a person doesn't. Styles can
+switch on habits measured from a real handwritten assignment:
+
+| Habit | Effect | Bounded by |
+|---|---|---|
+| `rise` | lines climb slightly to the right | added to the collision bound |
+| `margin_creep` | the left edge drifts right line by line within a paragraph | room reserved when wrapping, so lines never overflow |
+| `xscale_var` | each letter a little wider or narrower | 2σ clip |
+| `pressure` | per-word pen-pressure weight (0 for a fine ballpoint) | — |
+
+## Hand warp (scan and photo looks)
+
+Before the scanner/camera effects, the page raster goes through a smooth,
+seeded displacement field (`scan.hand_warp`): a short-wave part (≈2.6 px
+features, ≈0.75 px amplitude) bends strokes so that no two copies of a letter
+are identical, and a long-wave part makes lines gently wavy. Ballpoint ink
+flow is uneven too: a fine noise field lightens and darkens strokes (not the
+paper). The invisible text layer is unaffected, so search and the audit still
+read the exact text.
+
+## Photo look
+
+`output: "photo"` looks like a phone photo of the sheets rather than a flatbed
+scan: cool white paper under room light, a stronger light fall-off, a soft
+shadow where the sheet curves towards the binding, slightly more tilt, and
+stronger show-through.
+
+## Line grid on unruled paper
+
+On ruled and grid paper a line must sit on a printed rule, so the slot grid
+is one line. On blank and assignment paper the grid is a third of a line:
+when a tall letter would touch the line above, the line moves down by a
+third of a line, not a whole one, so spacing stays even like real writing.
+
 ## Assignment sheet
 
 Modelled on a real handwritten university assignment: loose unruled paper,
 written in blue ballpoint, then scanned. The **Assignment sheet** preset in the
-UI sets these options (all of them can also be used on their own):
+UI ("Handwritten assignment (real-photo look)") sets these options, plus the
+Real student hand, bright ballpoint ink and the photo look (all of them can
+also be used on their own):
 
 | Setting | Effect |
 |---|---|
@@ -94,6 +133,7 @@ UI sets these options (all of them can also be used on their own):
 | `header_name`, `header_id` | Written top-left on every page, one under the other, in the same hand (one printable line each, max 80 characters) |
 | `page_number_position: "top-right"` | Page number written at the top right instead of "– n –" at the bottom |
 | `underline_headings` | A hand-drawn, slightly bowed pen line under every heading line |
+| `plain_headings` | Headings at body size and not bold, as people write them by hand |
 | `show_through` | Scanned look: faint, blurred, mirrored writing from the back of the sheet |
 
 * **Header band** (`layout/engine.py: header_band`): computed by the layout

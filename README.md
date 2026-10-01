@@ -60,12 +60,15 @@ content hash of the exact revision it came from.
     scanner (paper texture, lighting, slight tilt, soft ink, per-letter
     variation), with an invisible text layer so it stays searchable;
   - a clean digital look is also available;
-  - 8 styles (including two student-ballpoint hands), blue or black ink,
+  - 9 styles (including a "real student hand" modelled on a real
+    handwritten assignment), blue, bright ballpoint blue or black ink,
     ruled/blank/grid/assignment paper;
-  - **Assignment sheet** preset (one click): unruled paper with a header line
-    and margin line, your name and roll/ID number at the top of every page,
-    page number top-right, hand-drawn underlines under headings (opt-in), and
-    faint show-through of writing from the back of the sheet;
+  - **Handwritten assignment** preset (one click): looks like a phone photo of
+    real handwritten sheets. Unruled paper with a header line and margin
+    line; your name and roll/ID number on every page; page number top-right;
+    plain, hand-underlined headings; every letter shaped slightly
+    differently, lines that rise and a margin that drifts; uneven ballpoint
+    ink and writing showing through from the back of the sheet;
   - size, line spacing, paragraph spacing and margins;
   - page numbers (bottom or top-right), variation amount and seed.
 * **Quality gate:** overflow, ink overlap, empty pages, exact content
@@ -153,7 +156,7 @@ limitations: **[docs/evaluation.md](docs/evaluation.md)**.
 | ![Landing](screenshots/01-landing.png) | ![Analysis](screenshots/02-analysis.png) |
 | ![Ask your document](screenshots/04-ask-your-document.png) | ![Flashcards](screenshots/05-flashcards.png) |
 | ![Quiz](screenshots/06-quiz.png) | ![Handwriting settings](screenshots/07-handwriting-settings.png) |
-| ![Assignment sheet](screenshots/09-assignment-sheet.png) | |
+| ![Assignment sheet](screenshots/09-assignment-sheet.png) | ![Handwritten assignment, photo look](screenshots/10-handwritten-assignment.jpg) |
 
 The screenshots are captured automatically by the Playwright tests
 (`frontend/e2e/study-and-pages.spec.js`, `assignment-sheet.spec.js`).

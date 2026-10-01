@@ -10,6 +10,7 @@
 | shadows-into-light-400.ttf | Shadows Into Light | SIL OFL 1.1 (LICENSE-shadows-into-light.txt) |
 | nothing-you-could-do-400.ttf | Nothing You Could Do | SIL OFL 1.1 (LICENSE-nothing-you-could-do.txt) |
 | annie-use-your-telescope-400.ttf | Annie Use Your Telescope | SIL OFL 1.1 (LICENSE-annie-use-your-telescope.txt) |
+| mynerve-400.ttf | Mynerve | SIL OFL 1.1 (LICENSE-mynerve.txt) |
 | dejavu-sans-fallback.ttf | DejaVu Sans | Bitstream Vera / DejaVu licence (free redistribution) |
 
 The handwriting fonts are the Latin subsets published in the `@fontsource/*` npm

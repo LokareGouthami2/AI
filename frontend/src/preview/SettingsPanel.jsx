@@ -18,6 +18,7 @@ export const DEFAULT_SETTINGS = {
   header_name: '',
   header_id: '',
   underline_headings: false,
+  plain_headings: false,
   show_through: false,
   watermark: false,
   output: 'scanned',
@@ -33,15 +34,20 @@ export const DEFAULT_SETTINGS = {
  */
 export const ASSIGNMENT_PRESET = {
   paper: 'assignment',
-  style: 'ballpoint',
-  ink: 'blue',
-  output: 'scanned',
+  style: 'student',
+  ink: 'ballpoint',
+  output: 'photo',
   page_numbers: true,
   page_number_position: 'top-right',
   underline_headings: true,
+  plain_headings: true,
   show_through: true,
-  line_spacing: 1.8,
-  margin_left_mm: 22,
+  font_size: 17,
+  line_spacing: 1.5,
+  paragraph_spacing: 0,
+  margin_left_mm: 20,
+  margin_right_mm: 8,
+  margin_bottom_mm: 10,
 };
 
 function YesNo({ label, value, onChange, testid }) {
@@ -85,7 +91,7 @@ export default function SettingsPanel({ settings, onChange, compact = false }) {
     <div className="stack" data-testid="render-settings">
     <div className="row">
       <button type="button" className={`btn ${isAssignment ? 'btn-primary' : ''}`} onClick={() => onChange({ ...settings, ...ASSIGNMENT_PRESET })} data-testid="preset-assignment">
-        📝 Assignment sheet
+        📝 Handwritten assignment (real-photo look)
       </button>
       <button type="button" className="btn" onClick={() => onChange({ ...DEFAULT_SETTINGS, header_name: settings.header_name, header_id: settings.header_id })} data-testid="preset-notes">
         📒 Notebook notes
@@ -104,6 +110,7 @@ export default function SettingsPanel({ settings, onChange, compact = false }) {
       <label className="field">
         <span>Look</span>
         <select className="select" value={settings.output} onChange={(e) => set('output')(e.target.value)} data-testid="output-look">
+          <option value="photo">Photo of handwritten pages (most realistic)</option>
           <option value="scanned">Scanned handwritten page</option>
           <option value="clean">Clean digital page</option>
         </select>
@@ -112,6 +119,7 @@ export default function SettingsPanel({ settings, onChange, compact = false }) {
         <span>Ink</span>
         <select className="select" value={settings.ink} onChange={(e) => set('ink')(e.target.value)}>
           <option value="blue">Blue</option>
+          <option value="ballpoint">Blue ballpoint (bright)</option>
           <option value="black">Black</option>
         </select>
       </label>
@@ -160,7 +168,8 @@ export default function SettingsPanel({ settings, onChange, compact = false }) {
         </select>
       </label>
       <YesNo label="Underline headings (hand-drawn)" value={settings.underline_headings} onChange={set('underline_headings')} testid="underline-headings" />
-      <YesNo label="Show-through from back of page (scanned look)" value={settings.show_through} onChange={set('show_through')} testid="show-through" />
+      <YesNo label="Headings written like normal text (not bold/large)" value={settings.plain_headings} onChange={set('plain_headings')} testid="plain-headings" />
+      <YesNo label="Show-through from back of page (scan/photo look)" value={settings.show_through} onChange={set('show_through')} testid="show-through" />
       <label className="field">
         <span>“Generated with WriteAI” footer</span>
         <select className="select" value={settings.watermark ? 'yes' : 'no'} onChange={(e) => set('watermark')(e.target.value === 'yes')}>

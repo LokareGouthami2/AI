@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 
 from backend.documents import storage
 from backend.editor import wdm
+from backend.handwriting.styles import STYLES
 from backend.layout.engine import layout
 from backend.layout.settings import RenderSettings, settings_hash
 from backend.models.entities import Document, RenderJob, RenderSettingsRow, utcnow
@@ -56,7 +57,7 @@ def build_pdf(dl, settings: RenderSettings, meta: dict, dpi: int) -> tuple[bytes
         return visible, visible
     layer = render_pdf(dl, meta, text_layer_only=True)
     seed_key = f"{meta.get('content_hash', '')}:{settings.seed}"
-    return scanned_pdf(visible, layer, seed_key, dpi=dpi, show_through=settings.show_through), visible
+    return scanned_pdf(visible, layer, seed_key, dpi=dpi, show_through=settings.show_through, look=settings.output, thin_px=STYLES[settings.style].thin_px), visible
 
 
 def _meta(head, title: str, s_hash: str) -> dict:

@@ -26,6 +26,12 @@ class StyleProfile:
     size_var: float  # per-glyph size variation (fraction)
     spacing_var: float  # per-glyph extra advance, fraction of font size
     word_space: float  # word-space multiplier
+    # Habits of a real writer (all 0 = off):
+    rise: float = 0.0  # lines climb to the right (slope, rad)
+    margin_creep: float = 0.0  # left edge drifts right line by line (fraction of font size)
+    xscale_var: float = 0.0  # each letter a little wider / narrower (fraction)
+    pressure: float = 1.0  # per-word pen-pressure stroke weight multiplier
+    thin_px: int = 0  # raster looks: thin strokes by this many px (fine ballpoint)
 
 
 STYLES: dict[str, StyleProfile] = {
@@ -36,12 +42,14 @@ STYLES: dict[str, StyleProfile] = {
     "quick": StyleProfile("quick", "Quick notes (Caveat)", "caveat-400", "caveat-700", 1.2, 0.0, 1.5, 0.022, 0.03, 0.03, 0.01, 1.1),
     "light": StyleProfile("light", "Light (Shadows Into Light)", "shadows-into-light-400", None, 1.1, 0.0, 1.5, 0.025, 0.03, 0.035, 0.012, 1.05),
     "ballpoint": StyleProfile("ballpoint", "Student ballpoint (Nothing You Could Do)", "nothing-you-could-do-400", None, 0.86, 0.0, 1.2, 0.02, 0.03, 0.03, 0.008, 1.0),
+    "student": StyleProfile("student", "Real student hand (Mynerve)", "mynerve-400", None, 0.98, 1.5, 1.5, 0.03, 0.045, 0.045, 0.012, 2.3, 0.006, 0.14, 0.05, 0.0, 0),
     "print": StyleProfile("print", "Student print (Annie Use Your Telescope)", "annie-use-your-telescope-400", None, 1.12, 3.0, 1.2, 0.022, 0.03, 0.03, 0.01, 1.05),
 }
 
 INKS = {
     "blue": (0.09, 0.17, 0.55),
     "black": (0.11, 0.11, 0.13),
+    "ballpoint": (0.16, 0.22, 0.66),  # bright royal-blue ballpoint
 }
 PAPER_BG = (1.0, 1.0, 0.985)
 RULE_COLOR = (0.62, 0.76, 0.90)

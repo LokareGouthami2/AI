@@ -378,3 +378,67 @@ def test_show_through_darkens_paper_but_keeps_text_layer():
     assert mean(plain) - mean(ghost) < 4  # ...but only faintly
     a = audit_pdf(d, dl, ghost, {"content_hash": "h"}, check_strokes=False)
     assert a.passed and a.metrics["text_similarity"] == 1.0
+
+
+# ------------------------------------------------- real-photo assignment look
+
+
+PHOTO_ASSIGNMENT = dict(
+    ASSIGNMENT,
+    style="student",
+    ink="ballpoint",
+    output="photo",
+    plain_headings=True,
+    show_through=True,
+    font_size=17,
+    line_spacing=1.5,
+    paragraph_spacing=0,
+    margin_left_mm=20,
+    margin_right_mm=8,
+    margin_bottom_mm=10,
+)
+
+
+def test_photo_assignment_look_passes_every_check():
+    d = long_doc(2)
+    s = RenderSettings(**PHOTO_ASSIGNMENT)
+    dl, (pdf, vector) = _scan(d, s)
+    r = check_layout(d, dl)
+    assert r.passed, r.to_dict()["errors"]  # incl. overflow with margin creep, contrast of ballpoint ink
+    assert audit_pdf(d, dl, vector, {"content_hash": "h"}).passed
+    a = audit_pdf(d, dl, pdf, {"content_hash": "h"}, check_strokes=False)
+    assert a.passed and a.metrics["text_similarity"] == 1.0
+    with pymupdf.open(stream=pdf) as doc:
+        assert all(page.get_images() for page in doc)
+
+
+def test_plain_headings_are_body_size_and_not_bold():
+    d = long_doc(1)
+    dl = layout(d, RenderSettings(**PHOTO_ASSIGNMENT), "h")
+    heading_ids = {ln.id for p in dl.pages for ln in p.lines if ln.kind == "heading"}
+    hg = [g for p in dl.pages for g in p.glyphs if g.line_id in heading_ids and not g.marker]
+    body = [g for p in dl.pages for g in p.glyphs if g.line_id not in heading_ids and not g.marker]
+    assert hg and not any(g.fake_bold for g in hg)
+    avg = lambda gs: sum(g.size for g in gs) / len(gs)  # noqa: E731
+    assert abs(avg(hg) - avg(body)) / avg(body) < 0.05
+
+
+def test_student_hand_drifts_right_and_varies_letter_widths():
+    d = wdm.WDMDocument(title="x", blocks=[wdm.para(" ".join(["word"] * 200))])
+    dl = layout(d, RenderSettings(**PHOTO_ASSIGNMENT), "h")
+    starts = [ln.x0 for ln in dl.pages[0].lines if ln.kind == "text"][:6]
+    assert starts[5] > starts[0]  # the left edge creeps right down the paragraph
+    assert max(ln.x1 for p in dl.pages for ln in p.lines) <= dl.box[2] + 0.5
+    widths = {round(g.xs, 3) for g in dl.pages[0].glyphs if not g.marker}
+    assert len(widths) > 20  # no two letters drawn identically
+
+
+def test_unruled_paper_avoids_collisions_by_small_steps():
+    d = long_doc(2)
+    ruled = layout(d, RenderSettings(**dict(PHOTO_ASSIGNMENT, paper="ruled")), "h")
+    sheet = layout(d, RenderSettings(**PHOTO_ASSIGNMENT), "h")
+    assert ruled.sub_slots == 1 and sheet.sub_slots == 3
+    # Moving a crowded line by a third of a line, not a whole one, keeps the
+    # page compact: never more pages than ruled paper.
+    assert len(sheet.pages) <= len(ruled.pages)
+    assert check_layout(d, sheet).passed
